@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>135 FILM · 胶片拼图</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Noto+Serif+SC:wght@300;400;600&display=swap');
+:root{--bg:#0e0e0e;--sb:#111;--bdr:#222;--bdr2:#3a3a3a;--amber:#c8882a;--amberL:#e0a040;--tx:#d8d0c0;--txd:#666;--txm:#444;--sf:#181818;--sf2:#1e1e1e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Noto Serif SC',serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{height:48px;background:#080808;border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0}
+.logo{font-family:'Special Elite',cursive;font-size:16px;color:var(--amber);letter-spacing:.06em}
+.logo-sub{font-size:11px;color:var(--txd);letter-spacing:.18em}
+.hmeta{margin-left:auto;font-size:11px;color:var(--txm)}
+.main{display:flex;flex:1;overflow:hidden}
+/* SIDEBAR */
+.sidebar{width:272px;flex-shrink:0;background:var(--sb);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden}
+.sidebar::-webkit-scrollbar{width:3px}.sidebar::-webkit-scrollbar-thumb{background:#2a2a2a}
+.sbs{padding:14px 14px 0}.sbs:last-child{padding-bottom:14px}
+.lbl{font-size:10px;color:var(--txd);letter-spacing:.18em;text-transform:uppercase;display:block;margin-bottom:8px}
+.div{height:1px;background:var(--bdr);margin:14px 0 0}
+/* Upload */
+.upz{border:1px dashed #2e2e2e;border-radius:5px;padding:13px 10px;text-align:center;cursor:pointer;transition:all .15s;position:relative;background:var(--sf)}
+.upz:hover,.upz.dov{border-color:var(--amber);background:rgba(200,136,42,.06)}
+.upz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.up-txt{font-size:11px;color:var(--txd);line-height:1.6}
+.up-cnt{font-size:11px;color:var(--amber);margin-top:4px;font-weight:600;min-height:16px}
+.up-err{font-size:11px;color:#e05050;min-height:15px;margin-top:3px}
+/* Thumbnails */
+.tgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px}
+.twrap{display:flex;flex-direction:column;gap:2px}
+.thumb{aspect-ratio:3/2;border-radius:3px;overflow:hidden;position:relative;cursor:grab;border:1.5px solid transparent;transition:border-color .12s,opacity .12s}
+.thumb:active{cursor:grabbing}
+.thumb.dsrc{opacity:.3}
+.thumb.dot{border-color:var(--amber)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.tdel{position:absolute;top:2px;right:2px;width:15px;height:15px;background:rgba(0,0,0,.75);border:none;border-radius:50%;color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .12s}
+.thumb:hover .tdel{opacity:1}
+.croprow{display:flex;gap:2px}
+.cbtn{flex:1;padding:2px 0;font-size:8px;background:var(--sf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txd);cursor:pointer;transition:all .12s;text-align:center;font-family:inherit}
+.cbtn:hover{border-color:var(--bdr2);color:var(--tx)}
+.cbtn.act{background:rgba(200,136,42,.15);border-color:var(--amber);color:var(--amber)}
+/* Mode toggle */
+.mode-row{display:flex;gap:5px}
+.mode-btn{flex:1;padding:8px 4px;border:1px solid var(--bdr);border-radius:5px;background:var(--sf);color:var(--tx);font-size:11px;cursor:pointer;transition:all .15s;font-family:inherit;line-height:1.35;text-align:center}
+.mode-btn:hover{border-color:var(--bdr2)}
+.mode-btn.act{border-color:var(--amber);background:rgba(200,136,42,.1);color:var(--amber)}
+.mn{display:block;font-weight:600;font-size:11px}
+.ms{display:block;font-size:9px;color:var(--txd);margin-top:2px}
+.mode-btn.act .ms{color:#a06820}
+/* Leader style picker */
+.lgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.lopt{border:1.5px solid var(--bdr);border-radius:4px;overflow:hidden;cursor:pointer;transition:border-color .15s;background:var(--sf)}
+.lopt:hover{border-color:var(--bdr2)}
+.lopt.act{border-color:var(--amber)}
+.lopt canvas{display:block;width:100%;height:auto}
+.lname{font-size:8px;color:var(--txd);text-align:center;padding:3px 2px;line-height:1.2;background:var(--sf)}
+.lopt.act .lname{color:var(--amber)}
+/* Preset */
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.pbtn{padding:7px 6px;border:1px solid var(--bdr);border-radius:4px;background:var(--sf);color:var(--tx);font-size:10px;cursor:pointer;text-align:center;transition:all .15s;font-family:inherit;line-height:1.4}
+.pbtn:hover{border-color:var(--bdr2)}
+.pbtn.act{border-color:var(--amber);background:rgba(200,136,42,.1);color:var(--amber)}
+.pn{display:block;font-weight:600;font-size:10px}
+.ps{display:block;font-size:9px;color:var(--txd);margin-top:1px}
+.pbtn.act .ps{color:#a06820}
+/* Intensity */
+.irow{display:flex;gap:4px}
+.ibtn{flex:1;padding:6px 2px;border:1px solid var(--bdr);border-radius:3px;background:var(--sf);color:var(--txd);font-size:10px;cursor:pointer;text-align:center;transition:all .15s;font-family:inherit}
+.ibtn:hover{border-color:var(--bdr2);color:var(--tx)}
+.ibtn.act{border-color:var(--amber);background:rgba(200,136,42,.1);color:var(--amber)}
+/* Slider */
+.slrow{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txd)}
+.slrow input{flex:1;accent-color:var(--amber);cursor:pointer}
+.sval{min-width:18px;text-align:right;color:var(--tx);font-weight:600}
+/* Toggle switch */
+.trow{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--txd)}
+.toggle{position:relative;width:36px;height:20px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.tslider{position:absolute;inset:0;background:#2a2a2a;border-radius:20px;transition:.2s}
+.tslider::before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:#666;border-radius:50%;transition:.2s}
+.toggle input:checked+.tslider{background:rgba(200,136,42,.3)}
+.toggle input:checked+.tslider::before{background:var(--amber);transform:translateX(16px)}
+/* Text input */
+.txin{width:100%;background:var(--sf);border:1px solid var(--bdr);border-radius:4px;color:var(--tx);padding:7px 9px;font-size:11px;font-family:'Special Elite',cursive;outline:none;transition:border-color .15s}
+.txin:focus{border-color:#444}
+/* Buttons */
+.btngrp{padding:14px;display:flex;flex-direction:column;gap:7px;margin-top:auto;border-top:1px solid var(--bdr)}
+.genbtn{width:100%;padding:10px;background:var(--amber);border:none;border-radius:5px;color:#0e0e0e;font-size:13px;font-weight:700;cursor:pointer;font-family:'Special Elite',cursive;letter-spacing:.05em;transition:background .15s}
+.genbtn:hover{background:var(--amberL)}
+.genbtn:active{transform:scale(.98)}
+.genbtn:disabled{background:#333;color:#666;cursor:not-allowed;transform:none}
+.expbtn{width:100%;padding:8px;background:transparent;border:1px solid var(--amber);border-radius:5px;color:var(--amber);font-size:12px;cursor:pointer;font-family:'Special Elite',cursive;letter-spacing:.04em;transition:all .15s}
+.expbtn:hover{background:rgba(200,136,42,.1)}
+.expbtn:disabled{border-color:#333;color:#444;cursor:not-allowed}
+/* Canvas area */
+.ca{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow:auto;background:#0a0a0a}
+.ca::-webkit-scrollbar{width:5px;height:5px}.ca::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:3px}
+.ph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--txd);text-align:center;margin:auto}
+.phi{font-size:44px;opacity:.2}
+.pht{font-size:14px;color:#444}
+.phs{font-size:12px;line-height:2;opacity:.6;max-width:300px}
+#cv{display:block;max-width:100%;height:auto;box-shadow:0 6px 50px rgba(0,0,0,.7);border-radius:3px}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">135 FILM</span>
+  <span class="logo-sub">胶片拼图生成器</span>
+  <span class="hmeta">单文件离线工具</span>
+</header>
+<div class="main">
+<div class="sidebar">
+  <!-- Upload -->
+  <div class="sbs">
+    <span class="lbl">上传照片 <span style="color:#555;font-size:9px;letter-spacing:0;text-transform:none">（8–36张）</span></span>
+    <div class="upz" id="uz">
+      <input type="file" id="fi" multiple accept="image/*">
+      <div style="font-size:18px;margin-bottom:4px;opacity:.5">📷</div>
+      <div class="up-txt">点击或拖拽上传<br>JPG · PNG · HEIC · WEBP</div>
+      <div class="up-cnt" id="ucnt">0 / 36 张</div>
+    </div>
+    <div class="up-err" id="uerr"></div>
+    <div class="tgrid" id="tg"></div>
+  </div>
+  <div class="div"></div>
+  <!-- Mode -->
+  <div class="sbs" style="padding-top:14px">
+    <span class="lbl">版式</span>
+    <div class="mode-row">
+      <button class="mode-btn act" data-m="portrait" onclick="selMode(this)">
+        <span class="mn">竖版</span><span class="ms">帧 2:3 竖向</span>
+      </button>
+      <button class="mode-btn" data-m="landscape" onclick="selMode(this)">
+        <span class="mn">横版</span><span class="ms">帧 3:2 横向</span>
+      </button>
+    </div>
+  </div>
+  <!-- White border toggle -->
+  <div class="sbs" style="padding-top:12px">
+    <div class="trow">
+      <span>复古白框</span>
+      <label class="toggle"><input type="checkbox" id="wbToggle" checked><span class="tslider"></span></label>
+    </div>
+  </div>
+  <div class="div"></div>
+  <!-- Leader style -->
+  <div class="sbs" style="padding-top:14px">
+    <span class="lbl">胶卷头款式</span>
+    <div class="lgrid" id="lgrid"></div>
+  </div>
+  <div class="div"></div>
+  <!-- Preset -->
+  <div class="sbs" style="padding-top:14px">
+    <span class="lbl">色调预设</span>
+    <div class="pgrid">
+      <button class="pbtn act" data-p="none" onclick="selPreset(this)"><span class="pn">原图</span><span class="ps">不加滤镜</span></button>
+      <button class="pbtn" data-p="fuji200" onclick="selPreset(this)"><span class="pn">富士 C200</span><span class="ps">清新绿调</span></button>
+      <button class="pbtn" data-p="kodak400" onclick="selPreset(this)"><span class="pn">柯达 400</span><span class="ps">暖黄复古</span></button>
+      <button class="pbtn" data-p="fujiDisp" onclick="selPreset(this)"><span class="pn">富士一次性</span><span class="ps">冷青对比</span></button>
+      <button class="pbtn" data-p="bw" onclick="selPreset(this)"><span class="pn">黑白</span><span class="ps">银盐质感</span></button>
+    </div>
+  </div>
+  <!-- Intensity -->
+  <div class="sbs" style="padding-top:12px" id="isec" style="display:none">
+    <span class="lbl">滤镜浓度</span>
+    <div class="irow">
+      <button class="ibtn" data-v="20" onclick="selInt(this)">20%</button>
+      <button class="ibtn" data-v="40" onclick="selInt(this)">40%</button>
+      <button class="ibtn act" data-v="60" onclick="selInt(this)">60%</button>
+      <button class="ibtn" data-v="80" onclick="selInt(this)">80%</button>
+      <button class="ibtn" data-v="100" onclick="selInt(this)">100%</button>
+    </div>
+  </div>
+  <div class="div"></div>
+  <!-- Frames per row -->
+  <div class="sbs" style="padding-top:14px">
+    <span class="lbl">每行帧数</span>
+    <div class="slrow">
+      <span>3</span>
+      <input type="range" min="3" max="7" value="5" step="1" id="fpsr" oninput="document.getElementById('fpsv').textContent=this.value">
+      <span>7</span>
+      <span class="sval" id="fpsv">5</span>
+    </div>
+  </div>
+  <!-- Date -->
+  <div class="sbs" style="padding-top:12px;padding-bottom:14px">
+    <span class="lbl">日期 / 备注</span>
+    <input class="txin" id="datin" placeholder="2024  SUMMER" maxlength="24">
+  </div>
+  <!-- Action buttons -->
+  <div class="btngrp">
+    <button class="genbtn" id="genb" onclick="generate()" disabled>▶ 生成预览</button>
+    <button class="expbtn" id="expb" onclick="exportPNG()" disabled>↓ 导出 PNG</button>
+  </div>
+</div><!-- /sidebar -->
+<!-- Canvas -->
+<div class="ca" id="ca">
+  <div class="ph" id="ph">
+    <div class="phi">🎞</div>
+    <div class="pht">上传 8–36 张照片，点击生成</div>
+    <div class="phs">模拟整卷35mm胶片展开<br>竖版 / 横版两种版式<br>含立体胶卷壳 · 复古白框可选</div>
+  </div>
+  <canvas id="cv" style="display:none"></canvas>
+</div>
+</div><!-- /main -->
+<script>
+'use strict';
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+let photos = [];      // {raw:Image, canvas:OffscreenCanvas, name, crop}
+let filmMode = 'portrait';  // 'portrait' | 'landscape'
+let preset = 'none';
+let intensity = 60;
+let leaderIdx = 0;
+let dragSrc = null;
+// ═══════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════
+const PRESETS = {
+  none:     {filmBg:'#181818',holeBg:'#080808',r:null,   g:null,   b:null,   sat:1,   tint:null,                  grain:0 },
+  fuji200:  {filmBg:'#181d18',holeBg:'#0a0a0a',r:[0,240],g:[0,255],b:[5,238],sat:1.05,tint:'rgba(10,30,10,0.1)', grain:14},
+  kodak400: {filmBg:'#1c1a10',holeBg:'#0a0a08',r:[5,255],g:[0,243],b:[0,208],sat:1.1, tint:'rgba(40,20,0,0.1)',  grain:18},
+  fujiDisp: {filmBg:'#0e1318',holeBg:'#060a0e',r:[0,228],g:[5,255],b:[12,255],sat:1.15,tint:'rgba(0,10,30,0.12)',grain:24},
+  bw:       {filmBg:'#141414',holeBg:'#050505',r:null,   g:null,   b:null,   sat:0,   tint:null,                  grain:28},
+};
+// Layout constants (all in logical px; canvas rendered @2×)
+const EDGE = 4, GAP = 3;
+const PAD  = 22;
+const WB   = 26;  // white border width
+const ROW_GAP = 20; // vertical gap between film strips
+// Portrait mode
+const PORT = {
+  frameW: 88, frameH: 132,  // 2:3
+  perfH: 28,
+  get stripH() { return this.frameH + this.perfH*2; },
+  stripW(fps) { return EDGE*2 + GAP*(fps-1) + this.frameW*fps; },
+  // Canister sits left of row-0, overlapping strip slightly
+  canW(fps) { return this.stripH * 0.60; },
+  canH(fps) { return this.stripH; },
+  leftPad(fps) {
+    const cw = this.canW(fps);
+    const overlap = cw * 0.15;
+    return Math.ceil(cw - overlap) + 10;
+  },
+};
+// Landscape mode
+const LAND = {
+  frameH: 90, frameW: 135,  // 3:2
+  perfH: 24,
+  get stripH() { return this.frameH + this.perfH*2; },
+  stripW(fps) { return EDGE*2 + GAP*(fps-1) + this.frameW*fps; },
+  get canW() { return this.stripH * 0.60; },
+  leftPad() {
+    const cw = this.canW;
+    const overlap = cw * 0.15;
+    return Math.ceil(cw - overlap) + 10;
+  },
+};
+// ═══════════════════════════════
+// UPLOAD / THUMB
+// ═══════════════════════════════
+const uz = document.getElementById('uz');
+const fi = document.getElementById('fi');
+fi.addEventListener('change', e => addFiles(e.target.files));
+uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('dov'); });
+uz.addEventListener('dragleave', () => uz.classList.remove('dov'));
+uz.addEventListener('drop', e => { e.preventDefault(); uz.classList.remove('dov'); addFiles(e.dataTransfer.files); });
+function setErr(msg) { document.getElementById('uerr').textContent = msg; }
+function addFiles(files) {
+  setErr('');
+  const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
+  let waiting = 0;
+  arr.forEach(f => {
+    if (photos.length + waiting >= 36) { setErr('最多36张，多余已忽略'); return; }
+    waiting++;
+    const url = URL.createObjectURL(f);
+    const img = new Image();
+    img.onload = () => {
+      photos.push({ raw: img, canvas: normalizeImg(img, 'mid'), name: f.name, crop: 'mid' });
+      URL.revokeObjectURL(url);
+      waiting--;
+      renderThumbs();
+    };
+    img.onerror = () => { waiting--; URL.revokeObjectURL(url); };
+    img.src = url;
+  });
+}
+// Normalize: crop source image to target aspect ratio with anchor
+function normalizeImg(src, crop, targetAsp) {
+  if (targetAsp === undefined) {
+    targetAsp = filmMode === 'portrait' ? (2/3) : (3/2);
+  }
+  const TW = filmMode === 'portrait' ? 400 : 600;
+  const TH = Math.round(TW / targetAsp);
+  const c = document.createElement('canvas');
+  c.width = TW; c.height = TH;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, TW, TH);
+  const sw = src.naturalWidth || src.width;
+  const sh = src.naturalHeight || src.height;
+  const sAsp = sw / sh;
+  let srcX = 0, srcY = 0, srcW = sw, srcH = sh;
+  if (sAsp > targetAsp) {
+    // source wider → crop sides
+    srcW = sh * targetAsp;
+    srcX = (sw - srcW) / 2;
+  } else {
+    // source taller → crop top/bottom
+    srcH = sw / targetAsp;
+    const spare = sh - srcH;
+    srcY = crop === 'top' ? 0 : crop === 'bot' ? spare : spare / 2;
+  }
+  ctx.drawImage(src, srcX, srcY, srcW, srcH, 0, 0, TW, TH);
+  return c;
+}
+function renderThumbs() {
+  const grid = document.getElementById('tg');
+  grid.innerHTML = '';
+  const cnt = document.getElementById('ucnt');
+  cnt.textContent = `${photos.length} / 36 张`;
+  cnt.style.color = photos.length < 8 ? '#e05050' : photos.length === 36 ? '#e09020' : '#c8882a';
+  document.getElementById('genb').disabled = photos.length < 8;
+  photos.forEach((p, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'twrap';
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    thumb.draggable = true;
+    thumb.dataset.i = i;
+    const img = document.createElement('img');
+    img.src = p.canvas.toDataURL('image/jpeg', 0.45);
+    const del = document.createElement('button');
+    del.className = 'tdel'; del.textContent = '×';
+    del.onclick = e => { e.stopPropagation(); photos.splice(i,1); renderThumbs(); };
+    // Drag
+    thumb.addEventListener('dragstart', () => { dragSrc = i; thumb.classList.add('dsrc'); });
+    thumb.addEventListener('dragend', () => { dragSrc = null; document.querySelectorAll('.thumb').forEach(t => t.classList.remove('dsrc','dot')); });
+    thumb.addEventListener('dragover', e => { e.preventDefault(); thumb.classList.add('dot'); });
+    thumb.addEventListener('dragleave', () => thumb.classList.remove('dot'));
+    thumb.addEventListener('drop', e => {
+      e.preventDefault();
+      if (dragSrc === null || dragSrc === i) return;
+      const moved = photos.splice(dragSrc, 1)[0];
+      photos.splice(i, 0, moved);
+      renderThumbs();
+    });
+    thumb.append(img, del);
+    // Crop buttons
+    const crow = document.createElement('div');
+    crow.className = 'croprow';
+    ['top','mid','bot'].forEach(c => {
+      const b = document.createElement('button');
+      b.className = 'cbtn' + (p.crop === c ? ' act' : '');
+      b.textContent = c === 'top' ? '上' : c === 'mid' ? '中' : '下';
+      b.onclick = () => { p.crop = c; p.canvas = normalizeImg(p.raw, c); renderThumbs(); };
+      crow.appendChild(b);
+    });
+    wrap.append(thumb, crow);
+    grid.appendChild(wrap);
+  });
+}
+// ═══════════════════════════════
+// CONTROLS
+// ═══════════════════════════════
+function selMode(btn) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('act'));
+  btn.classList.add('act');
+  filmMode = btn.dataset.m;
+  // Re-normalize all photos for new aspect ratio
+  photos.forEach(p => { p.canvas = normalizeImg(p.raw, p.crop); });
+  renderThumbs();
+}
+function selPreset(btn) {
+  document.querySelectorAll('.pbtn').forEach(b => b.classList.remove('act'));
+  btn.classList.add('act');
+  preset = btn.dataset.p;
+  document.getElementById('isec').style.display = preset === 'none' ? 'none' : '';
+}
+function selInt(btn) {
+  document.querySelectorAll('.ibtn').forEach(b => b.classList.remove('act'));
+  btn.classList.add('act');
+  intensity = parseInt(btn.dataset.v);
+}
+// Hide intensity by default
+document.getElementById('isec').style.display = 'none';
+// ═══════════════════════════════
+// LEADER THUMBNAILS INIT
+// ═══════════════════════════════
+const LEADERS = [
+  { name:'Fuji Provia\n100F',       draw: ldrFujiProvia    },
+  { name:'Fuji\nFujicolor 200',     draw: ldrFujicolor200  },
+  { name:'Kodak\nEktachrome E100',  draw: ldrEktaE100      },
+  { name:'Kodak\nEktachrome E100D', draw: ldrEktaE100D     },
+  { name:'Kodak\nPortra 160',       draw: ldrPortra160     },
+  { name:'Kodak\nPortra 400',       draw: ldrPortra400     },
+  { name:'Kodak\n400 Color',        draw: ldrKodak400      },
+  { name:'Kodak\nGold 200',         draw: ldrGold200       },
+  { name:'Kodak\nGold 100',         draw: ldrGold100       },
+];
+function initLeaderGrid() {
+  const grid = document.getElementById('lgrid');
+  LEADERS.forEach((s, i) => {
+    const opt = document.createElement('div');
+    opt.className = 'lopt' + (i===0?' act':'');
+    opt.onclick = () => {
+      document.querySelectorAll('.lopt').forEach(o => o.classList.remove('act'));
+      opt.classList.add('act');
+      leaderIdx = i;
+    };
+    const pw=120, ph=80;
+    const c = document.createElement('canvas');
+    c.width=pw*2; c.height=ph*2; c.style.width=pw+'px'; c.style.height=ph+'px';
+    const ctx=c.getContext('2d'); ctx.scale(2,2);
+    s.draw(ctx, 0, 0, pw, ph, true);
+    const nm=document.createElement('div');
+    nm.className='lname'; nm.textContent=s.name.replace('\n',' ');
+    opt.append(c, nm);
+    grid.appendChild(opt);
+  });
+}
+// ═══════════════════════════════
+// CANVAS UTILITIES
+// ═══════════════════════════════
+function rrect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+// Slightly wobbly fill for hand-drawn feel
+function sketchy(ctx, x, y, w, h, fill, lineCol) {
+  ctx.fillStyle = fill; ctx.fillRect(x, y, w, h);
+  if (!lineCol) return;
+  ctx.save();
+  ctx.strokeStyle = lineCol; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+  const j = () => (Math.random()-0.5)*1.4;
+  ctx.beginPath();
+  ctx.moveTo(x+j(),y+j()); ctx.lineTo(x+w+j(),y+j()); ctx.lineTo(x+w+j(),y+h+j());
+  ctx.lineTo(x+j(),y+h+j()); ctx.closePath(); ctx.stroke();
+  ctx.restore();
+}
+// Perforations row
+function drawPerfs(ctx, x, y, sw, perfH, pr) {
+  const hCount = Math.max(4, Math.round(sw / 20));
+  const hW = 9, hH = Math.round(perfH * 0.55), hR = 2;
+  const hs = sw / hCount;
+  ctx.fillStyle = pr.holeBg;
+  for (let i=0; i<hCount; i++) {
+    rrect(ctx, x + hs*i + (hs-hW)/2, y + (perfH-hH)/2, hW, hH, hR);
+    ctx.fill();
+  }
+}
+// ═══════════════════════════════
+// LEADER DRAWERS
+// When isPreview=true: fill whole w×h area for thumbnail
+// When isPreview=false: draw tongue only on right 45% of the strip
+// ═══════════════════════════════
+// Returns tongue bounds for a full strip leader
+function tongue(x, y, w, h) {
+  const ts  = x + w * 0.55;   // tongue starts here
+  const nW  = w * 0.08;       // notch width
+  const hz  = Math.round(h * 0.22); // perf zone height
+  const mY  = y + h/2;
+  const tH  = h * 0.48;
+  const t1  = mY - tH/2;
+  const t2  = mY + tH/2;
+  const tx  = ts + nW;         // inner tongue x
+  const ty  = y + hz + 2;
+  const tw  = x + w - tx;
+  const th  = h - hz*2 - 4;
+  return { ts, nW, hz, t1, t2, tx, ty, tw, th };
+}
+function clipTongue(ctx, x, y, w, h) {
+  const { ts, nW, hz, t1, t2 } = tongue(x, y, w, h);
+  const ty = y + hz + 2, bH = h - hz*2 - 4;
+  ctx.beginPath();
+  ctx.moveTo(ts, t1); ctx.lineTo(ts+nW, t1);
+  ctx.lineTo(ts+nW, ty); ctx.lineTo(x+w, ty);
+  ctx.lineTo(x+w, ty+bH); ctx.lineTo(ts+nW, ty+bH);
+  ctx.lineTo(ts+nW, t2); ctx.lineTo(ts, t2);
+  ctx.closePath();
+}
+// ── Fuji Provia 100F (green left + blue right + white text)
+function ldrFujiProvia(ctx, x, y, w, h, isPreview) {
+  if (isPreview) {
+    ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
+    sketchy(ctx,x,y,w*0.42,h,'#1e7a1e','rgba(0,0,0,0.3)');
+    sketchy(ctx,x+w*0.42,y,w*0.58,h,'#1a3db0','rgba(0,0,0,0.25)');
+    ctx.fillStyle='#fff'; ctx.textAlign='center';
+    ctx.font=`bold ${h*0.19}px 'Special Elite',monospace`; ctx.fillText('PROVIA',x+w*0.5,y+h*0.44);
+    ctx.font=`bold ${h*0.16}px monospace`; ctx.fillText('100F',x+w*0.5,y+h*0.66);
+    ctx.font=`${h*0.11}px monospace`; ctx.fillStyle='#cfc'; ctx.fillText('FUJIFILM',x+w*0.5,y+h*0.84);
+    return;
+  }
+  const pr=PRESETS[preset]||PRESETS.none;
+  const {tx,ty,tw,th}=tongue(x,y,w,h);
+  ctx.fillStyle=pr.filmBg; ctx.fillRect(x,y,w,h);
+  drawPerfs(ctx,x,y,w,tongue(x,y,w,h).hz,pr);
+  drawPerfs(ctx,x,y+h-tongue(x,y,w,h).hz,w,tongue(x,y,w,h).hz,pr);
+  ctx.save(); clipTongue(ctx,x,y,w,h); ctx.clip();
+  sketchy(ctx,tx,ty,tw*0.38,th,'#1e7a1e','rgba(0,0,0,0.25)');
+  sketchy(ctx,tx+tw*0.38,ty,tw*0.62,th,'#1a3db0','rgba(0,0,0,0.2)');
+  ctx.fillStyle='#fff'; ctx.textAlign='center';
+  ctx.font=`bold ${th*0.22}px 'Special Elite',monospace`; ctx.fillText('PROVIA',tx+tw/2,ty+th*0.33);
+  ctx.font=`bold ${th*0.3}px monospace`; ctx.fillText('100F',tx+tw/2,ty+th*0.58);
+  ctx.font=`${th*0.13}px monospace`; ctx.fillStyle='#cfc'; ctx.fillText('FUJIFILM',tx+tw/2,ty+th*0.76);
+  ctx.font=`${th*0.1}px monospace`; ctx.fillStyle='rgba(255,255,255,0.4)';
+  ctx.fillText('DAYLIGHT · E-6',tx+tw/2,ty+th*0.91);
+  ctx.restore();
+}
+// ── Fuji Fujicolor 200 (green + big white panel + "200")
+function ldrFujicolor200(ctx, x, y, w, h, isPreview) {
+  if (isPreview) {
+    ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
+    sketchy(ctx,x,y,w,h,'#1e7a1e','rgba(0,0,0,0.3)');
+    sketchy(ctx,x+w*0.3,y+h*0.1,w*0.62,h*0.44,'#f0f0e8','rgba(0,0,0,0.2)');
+    ctx.fillStyle='#1a1a1a'; ctx.font=`bold ${h*0.3}px monospace`; ctx.textAlign='center';
+    ctx.fillText('200',x+w*0.62,y+h*0.44);
+    ctx.fillStyle='#fff'; ctx.font=`${h*0.12}px monospace`; ctx.fillText('FUJICOLOR',x+w*0.5,y+h*0.68);
+    return;
+  }
+  const pr=PRESETS[preset]||PRESETS.none;
+  const tg=tongue(x,y,w,h);
+  ctx.fillStyle=pr.filmBg; ctx.fillRect(x,y,w,h);
+  drawPerfs(ctx,x,y,w,tg.hz,pr); drawPerfs(ctx,x,y+h-tg.hz,w,tg.hz,pr);
+  ctx.save(); clipTongue(ctx,x,y,w,h); ctx.clip();
+  const {tx,ty,tw,th}=tg;
+  sketchy(ctx,tx,ty,tw,th,'#1e7a1e','rgba(0,0,0,0.25)');
+  sketchy(ctx,tx+tw*0.05,ty+th*0.08,tw*0.9,th*0.42,'#f5f5ed','rgba(0,0,0,0.15)');
+  ctx.fillStyle='#1a1a1a'; ctx.font=`bold ${th*0.36}px monospace`; ctx.textAlign='center';
+  ctx.fillText('200',tx+tw*0.5,ty+th*0.44);
+  ctx.fillStyle='#fff'; ctx.font=`bold ${th*0.15}px monospace`; ctx.fillText('FUJICOLOR',tx+tw*0.5,ty+th*0.65);
+  ctx.font=`${th*0.12}px monospace`; ctx.fillText('FUJIFILM',tx+tw*0.5,ty+th*0.8);
+  ctx.font=`${th*0.1}px monospace`; ctx.fillStyle='rgba(255,255,255,0.4)';
+  ctx.fillText('FILM FOR COLOR PRINTS',tx+tw*0.5,ty+th*0.93);
+  ctx.restore();
+}
+// ── Kodak Ektachrome E100 (blue+gold, vertical E100)
+function ldrEktaE100(ctx, x, y, w, h, isPreview) {
+  if (isPreview) {
+    ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
+    sketchy(ctx,x,y,w*0.55,h,'#1a3db0','rgba(0,0,0,0.3)');
+    sketchy(ctx,x+w*0.55,y,w*0.45,h,'#c8900a','rgba(0,0,0,0.25)');
+    ctx.save(); ctx.translate(x+w*0.28,y+h*0.82); ctx.rotate(-Math.PI/2);
+    ctx.fillStyle='#f0d060'; ctx.font=`bold ${h*0.26}px monospace`; ctx.textAlign='center';
+    ctx.fillText('E100',0,0); ctx.restore();
+    ctx.fillStyle='#fff'; ctx.font=`${h*0.1}px monospace`; ctx.textAlign='right';
+    ctx.fillText('Kodak',x+w*0.94,y+h*0.3);
+    return;
+  }
+  const pr=PRESETS[preset]||PRESETS.none;
+  const tg=tongue(x,y,w,h);
+  ctx.fillStyle=pr.filmBg; ctx.fillRect(x,y,w,h);
+  drawPerfs(ctx,x,y,w,tg.hz,pr); drawPerfs(ctx,x,y+h-tg.hz,w,tg.hz,pr);
+  ctx.save(); clipTongue(ctx,x,y,w,h); ctx.clip();
+  const {tx,ty,tw,th}=tg;
+  sketchy(ctx,tx,ty,tw*0.55,th,'#1a3db0','rgba(0,0,0,0.2)');
+  sketchy(ctx,tx+tw*0.55,ty,tw*0.45,th,'#c8900a','rgba(0,0,0,0.2)');
+  ctx.save(); ctx.translate(tx+tw*0.27,ty+th*0.88); ctx.rotate(-Math.PI/2);
+  ctx.fillStyle='#f0d060'; ctx.font=`bold ${th*0.32}px monospace`; ctx.textAlign='center';
+  ctx.fillText('E100',0,0); ctx.restore();
+  ctx.fillStyle='#fff'; ctx.textAlign='right'; ctx.font=`${th*0.12}px monospace`;
+  ctx.fillText('Kodak',tx+tw*0.96,ty+th*0.22);
+  ctx.fillStyle='#ff4040'; ctx.font=`bold ${th*0.11}px monospace`;
+  ctx.fillText('Professional',tx+tw*0.96,ty+th*0.35);
+  ctx.fillStyle='#fff'; ctx.font=`${th*0.1}px monospace`;
+  ctx.fillText('Ektachrome',tx+tw*0.96,ty+th*0.48);
+  ctx.fillText('E-6 · 36exp',tx+tw*0.96,ty+th*0.62);
+  ctx.restore();
+}
+// ── Kodak Ektachrome E100D (blue+gold, E100D + serial)
+function ldrEktaE100D(ctx, x, y, w, h, isPreview) {
+  if (isPreview) {
+    ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
+    sketchy(ctx,x,y,w*0.55,h,'#1a3db0','rgba(0,0,0,0.3)');
+    sketchy(ctx,x+w*0.55,y,w*0.45,h,'#b07f08','rgba(0,0,0,0.25)');
+    ctx.save(); ctx.translate(x+w*0.28,y+h*0.85); ctx.rotate(-Math.PI/2);
+    ctx.fillStyle='#f0d060'; ctx.font=`bold ${h*0.22}px monospace`; ctx.textAlign='center';
+    ctx.fillText('E100D',0,0); ctx.restore();
+    ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.font=`${h*0.09}px monospace`; ctx.textAlign='right';
+    ctx.fillText('5294',x+w*0.94,y+h*0.55);
+    return;
+  }
+  const pr=PRESETS[preset]||PRESETS.none;
+  const tg=tongue(x,y,w,h);
+  ctx.fillStyle=pr.filmBg; ctx.fillRect(x,y,w,h);
+  drawPerfs(ctx,x,y,w,tg.hz,pr); drawPerfs(ctx,x,y+h-tg.hz,w,tg.hz,pr);
+  ctx.save(); clipTongue(ctx,x,y,w,h); ctx.clip();
+  const {tx,ty,tw,th}=tg;
+  sketchy(ctx,tx,ty,tw*0.55,th,'#1a3db0','rgba(0,0,0,0.2)');
+  sketchy(ctx,tx+tw*0.55,ty,tw*0.45,th,'#b07f08','rgba(0,0,0,0.2)');
+  ctx.save(); ctx.translate(tx+tw*0.27,ty+th*0.9); ctx.rotate(-Math.PI/2);
+  ctx.fillStyle='#f0d060'; ctx.font=`bold ${th*0.27}px monospace`; ctx.textAlign='center';
+  ctx.fillText('E100D',0,0); ctx.restore();
+  ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.textAlign='right'; ctx.font=`${th*0.11}px monospace`;
+  ctx.fillText('5294',tx+tw*0.96,ty+th*0.3);
+  ctx.fillStyle='#fff'; ctx.font=`${th*0.1}px monospace`;
+  ctx.fillText('Kodak',tx+tw*0.96,ty+th*0.45);
+  ctx.fillStyle='#ff4040'; ctx.font=`bold ${th*0.1}px monospace`;
+  ctx.fillText('Professional',tx+tw*0.96,ty+th*0.57);
+  ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font=`${th*0.09}px monospace`;
+  ctx.fillText('E-6 · 36exp',tx+tw*0.96,ty+th*0.7);
+  ctx.restore();
+}
+// ── Kodak Portra 160 (gold+black band, italic serif)
+function ldrPortra160(ctx, x, y, w, h, isPreview) {
+  if (isPreview) {
+    ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
+    sketchy(ctx,x,y,w,h,'#d4a017','rgba(0,0,0,0.28)');
+    ctx.fillStyle='rgba(0,0,0,0.62)'; ctx.fillRect(x,y,w,h*0.26);
+    ctx.fillStyle='#fff'; ctx.font=`${h*0.12}px serif`; ctx.textAlign='center'; ctx.fillText('C-41',x+w/2,y+h*0.19);
+    ctx.fillStyle='#111'; ctx.font=`italic bold ${h*0.19}px Georgia,serif`; ctx.textAlign='right';
+    ctx.fillText('Kodak',x+w*0.93,y+h*0.5);
+    ctx.font=`italic ${h*0.13}px Georgia,serif`; ctx.fillText('PORTRA 160',x+w*0.93,y+h*0.68);
+    return;
+  }
+  const pr=PRESETS[preset]||PRESETS.none;
+  const tg=tongue(x,y,w,h);
+  ctx.fillStyle=pr.filmBg; ctx.fillRect(x,y,w,h);
+  drawPerfs(ctx,x,y,w,tg.hz,pr); drawPerfs(ctx,x,y+h-tg.hz,w,tg.hz,pr);
+  ctx.save(); clipTongue(ctx,x,y,w,h); ctx.clip();
+  const {tx,ty,tw,th}=tg;
+  sketchy(ctx,tx,ty,tw,th,'#d4a017','rgba(0,0,0,0.22)');
+  sketchy(ctx,tx,ty,tw,th*0.22,'rgba(0,0,0,0.65)');
+  ctx.fillStyle='#fff'; ctx.font=`${th*0.14}px monospace`; ctx.textAlign='center';
+  ctx.fillText('C-41',tx+tw/2,ty+th*0.17);
+  ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font=`${th*0.09}px monospace`;
+  ctx.fillText('Color Negative Film',tx+tw/2,ty+th*0.28);
+  ctx.fillStyle='#111'; ctx.font=`italic bold ${th*0.22}px Georgia,serif`; ctx.textAlign='right';
+  ctx.fillText('Kodak',tx+tw*0.95,ty+th*0.52);
+  ctx.font=`italic ${th*0.14}px Georgia,serif`; ctx.fillText('Professional',tx+tw*0.95,ty+th*0.67);
+  ctx.font=`italic bold ${th*0.15}px Georgia,serif`; ctx.fillText('PORTRA 160',tx+tw*0.95,ty+th*0.83);
+  ctx.font=`${th*0.1}px monospace`; ctx.fillStyle='rgba(0,0,0,0.45)';
+  ctx.fillText('36 EXP',tx+tw*0.95,ty+th*0.95);
+  ctx.restore();
+}
+// ── Kodak Portra 400 (same as 160 but different number)
+function ldrPortra400(ctx, x, y, w, h, isPreview) {
+  if (isPreview) {
+    ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
+    sketchy(ctx,x,y,w,h,'#d4a017','rgba(0,0,0,0.28)');
+    ctx.fillStyle='rgba(0,0,0,0.62)'; ctx.fillRect(x,y,w,h*0.26);
+    ctx.fillStyle='#fff'; ctx.font=`${h*0.12}px serif`; ctx.textAlign='center'; ctx.fillText('C-41',x+w/2,y+h*0.19);
+    ctx.fillStyle='#111'; ctx.font=`italic bold ${h*0.19}px Georgia,serif`; ctx.textAlign='right';
+    ctx.fillText('Kodak',x+w*0.93,y+h*0.5);
+    ctx.font=`italic ${h*0.13}px Georgia,serif`; ctx.fillText('PORTRA 400',x+w*0.93,y+h*0.68);
+    return;
+  }
+  const pr=PRESETS[preset]||PRESETS.none;
+  const tg=tongue(x,y,w,h);
+  ctx.fillStyle=pr.filmBg; ctx.fillRect(x,y,w,h);
+  drawPerfs(ctx,x,y,w,tg.hz,pr); drawPerfs(ctx,x,y+h-tg.hz,w,tg.hz,pr);
+  ctx.save(); clipTongue(ctx,x,y,w,h); ctx.clip();
+  const {tx,ty,tw,th}=tg;
+  sketchy(ctx,tx,ty,tw,th,'#d4a017','rgba(0,0,0,0.22)');
+  sketchy(ctx,tx,ty,tw,th*0.22,'rgba(0,0,0,0.65)');
+  ctx.fillStyle='#fff'; ctx.font=`${th*0.14}px monospace`; ctx.textAlign='center';
+  ctx.fillText('C-41',tx+tw/2,ty+th*0.17);
+  ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font=`${th*0.09}px monospace`;
+  ctx.fillText('Color Negative Film',tx+tw/2,ty+th*0.28);
+  ctx.fillStyle='#111'; ctx.font=`italic bold ${th*0.22}px Georgia,serif`; ctx.textAlign='right';
+  ctx.fillText('Kodak',tx+tw*0.95,ty+th*0.52);
+  ctx.font=`italic ${th*0.14}px Georgia,serif`; ctx.fillText('Professional',tx+tw*0.95,ty+th*0.67);
+  ctx.font=`italic bold ${th*0.15}px Georgia,serif`; ctx.fillText('PORTRA 400',tx+tw*0.95,ty+th*0.83);
+  ctx.font=`${th*0.1}px monospace`; ctx.fillStyle='rgba(0,0,0,0.45)';
+  ctx.fillText('36 EXP',tx+tw*0.95,ty+th*0.95);
+  ctx.restore();
+}
+// ── Kodak 400 Color (gold, big hand-lettered "kodak 400")
+function ldrKodak400(ctx, x, y, w, h, isPreview) {
+  if (isPreview) {
+    ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
+    sketchy(ctx,x,y,w,h,'#d4a017','rgba(0,0,0,0.28)');
+    ctx.fillStyle='#111'; ctx.font=`bold ${h*0.28}px 'Special Elite',cursive`; ctx.textAlign='center';
+    ctx.fillText('kodak',x+w/2,y+h*0.42); ctx.font=`bold ${h*0.3}px 'Special Elite',cursive`;
+    ctx.fillText('400',x+w/2,y+h*0.74);
+    return;
+  }
+  const pr=PRESETS[preset]||PRESETS.none;
+  const tg=tongue(x,y,w,h);
+  ctx.fillStyle=pr.filmBg; ctx.fillRect(x,y,w,h);
+  drawPerfs(ctx,x,y,w,tg.hz,pr); drawPerfs(ctx,x,y+h-tg.hz,w,tg.hz,pr);
+  ctx.save(); clipTongue(ctx,x,y,w,h); ctx.clip();
+  const {tx,ty,tw,th}=tg;
+  sketchy(ctx,tx,ty,tw,th,'#d4a017','rgba(0,0,0,0.22)');
+  ctx.fillStyle='#111'; ctx.textAlign='left';
+  ctx.font=`bold ${th*0.12}px monospace`; ctx.fillText('DX',tx+tw*0.05,ty+th*0.15);
+  ctx.font=`${th*0.09}px monospace`; ctx.fillStyle='rgba(0,0,0,0.5)';
+  ctx.fillText('35mm color prints film',tx+tw*0.05,ty+th*0.27);
+  ctx.fillStyle='#111'; ctx.font=`bold ${th*0.28}px 'Special Elite',cursive`; ctx.textAlign='center';
+  ctx.fillText('kodak',tx+tw/2,ty+th*0.52);
+  ctx.font=`bold ${th*0.3}px 'Special Elite',cursive`; ctx.fillText('400',tx+tw/2,ty+th*0.8);
+  ctx.font=`${th*0.1}px monospace`; ctx.fillStyle='rgba(0,0,0,0.45)'; ctx.textAlign='right';
+  ctx.fillText('36exp.',tx+tw*0.96,ty+th*0.95);
+  ctx.restore();
+}
+// ── Kodak Gold 200 (gold, "kodak GOLD 200", GB)
+function ldrGold200(ctx, x, y, w, h, isPreview) {
+  if (isPreview) {
+    ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
+    sketchy(ctx,x,y,w,h,'#c8940a','rgba(0,0,0,0.28)');
+    ctx.fillStyle='#111'; ctx.font=`bold ${h*0.17}px 'Special Elite',cursive`; ctx.textAlign='center';
+    ctx.fillText('kodak',x+w/2,y+h*0.33); ctx.font=`bold ${h*0.25}px 'Special Elite',cursive`;
+    ctx.fillText('GOLD',x+w/2,y+h*0.57); ctx.font=`bold ${h*0.2}px monospace`;
+    ctx.fillText('200',x+w/2,y+h*0.78);
+    return;
+  }
+  const pr=PRESETS[preset]||PRESETS.none;
+  const tg=tongue(x,y,w,h);
+  ctx.fillStyle=pr.filmBg; ctx.fillRect(x,y,w,h);
+  drawPerfs(ctx,x,y,w,tg.hz,pr); drawPerfs(ctx,x,y+h-tg.hz,w,tg.hz,pr);
+  ctx.save(); clipTongue(ctx,x,y,w,h); ctx.clip();
+  const {tx,ty,tw,th}=tg;
+  sketchy(ctx,tx,ty,tw,th,'#c8940a','rgba(0,0,0,0.22)');
+  ctx.fillStyle='#111'; ctx.textAlign='left';
+  ctx.font=`bold ${th*0.11}px monospace`; ctx.fillText('DX',tx+tw*0.05,ty+th*0.14);
+  ctx.fillText('GB',tx+tw*0.05,ty+th*0.26);
+  ctx.textAlign='center';
+  ctx.font=`bold ${th*0.22}px 'Special Elite',cursive`; ctx.fillText('kodak',tx+tw/2,ty+th*0.4);
+  ctx.font=`bold ${th*0.28}px 'Special Elite',cursive`; ctx.fillText('GOLD',tx+tw/2,ty+th*0.63);
+  ctx.font=`bold ${th*0.22}px monospace`; ctx.fillText('200',tx+tw/2,ty+th*0.83);
+  ctx.font=`${th*0.1}px monospace`; ctx.fillStyle='rgba(0,0,0,0.45)'; ctx.textAlign='right';
+  ctx.fillText('36exp.',tx+tw*0.96,ty+th*0.95);
+  ctx.restore();
+}
+// ── Kodak Gold 100 (gold, GA)
+function ldrGold100(ctx, x, y, w, h, isPreview) {
+  if (isPreview) {
+    ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
+    sketchy(ctx,x,y,w,h,'#c8940a','rgba(0,0,0,0.28)');
+    ctx.fillStyle='#111'; ctx.font=`bold ${h*0.17}px 'Special Elite',cursive`; ctx.textAlign='center';
+    ctx.fillText('kodak',x+w/2,y+h*0.33); ctx.font=`bold ${h*0.25}px 'Special Elite',cursive`;
+    ctx.fillText('GOLD',x+w/2,y+h*0.57); ctx.font=`bold ${h*0.2}px monospace`;
+    ctx.fillText('100',x+w/2,y+h*0.78);
+    return;
+  }
+  const pr=PRESETS[preset]||PRESETS.none;
+  const tg=tongue(x,y,w,h);
+  ctx.fillStyle=pr.filmBg; ctx.fillRect(x,y,w,h);
+  drawPerfs(ctx,x,y,w,tg.hz,pr); drawPerfs(ctx,x,y+h-tg.hz,w,tg.hz,pr);
+  ctx.save(); clipTongue(ctx,x,y,w,h); ctx.clip();
+  const {tx,ty,tw,th}=tg;
+  sketchy(ctx,tx,ty,tw,th,'#c8940a','rgba(0,0,0,0.22)');
+  ctx.fillStyle='#111'; ctx.textAlign='left';
+  ctx.font=`bold ${th*0.11}px monospace`; ctx.fillText('DX',tx+tw*0.05,ty+th*0.14);
+  ctx.fillText('GA',tx+tw*0.05,ty+th*0.26);
+  ctx.textAlign='center';
+  ctx.font=`bold ${th*0.22}px 'Special Elite',cursive`; ctx.fillText('kodak',tx+tw/2,ty+th*0.4);
+  ctx.font=`bold ${th*0.28}px 'Special Elite',cursive`; ctx.fillText('GOLD',tx+tw/2,ty+th*0.63);
+  ctx.font=`bold ${th*0.22}px monospace`; ctx.fillText('100',tx+tw/2,ty+th*0.83);
+  ctx.font=`${th*0.1}px monospace`; ctx.fillStyle='rgba(0,0,0,0.45)'; ctx.textAlign='right';
+  ctx.fillText('36exp.',tx+tw*0.96,ty+th*0.95);
+  ctx.restore();
+}
+// ═══════════════════════════════
+// FILM CANISTER (portrait mode, row 0 left side)
+// Draws a simplified 3D-ish canister
+// ═══════════════════════════════
+function drawCanister(ctx, x, y, w, h) {
+  // Body
+  const bx=x+w*0.05, bw=w*0.88, by=y+h*0.12, bh=h*0.78;
+  // Cylinder body
+  ctx.fillStyle='#1a1a1a'; rrect(ctx,bx,by,bw,bh,6); ctx.fill();
+  sketchStroke(ctx,bx,by,bw,bh,6,'rgba(255,255,255,0.08)',1.5);
+  // Leader slot at bottom
+  const slotW=bw*0.22, slotH=bh*0.08;
+  const slotX=bx+(bw-slotW)/2, slotY=by+bh-slotH-bh*0.05;
+  ctx.fillStyle='#0a0a0a'; rrect(ctx,slotX,slotY,slotW,slotH,2); ctx.fill();
+  // Label area (coloured panel on front)
+  const lx=bx+bw*0.04, lw=bw*0.92, ly=by+bh*0.15, lh=bh*0.6;
+  LEADERS[leaderIdx].draw(ctx, lx, ly, lw, lh, true);
+  // Top cap
+  const capH=h*0.1;
+  ctx.fillStyle='#2a2a2a';
+  rrect(ctx,bx+bw*0.1,y,bw*0.8,capH,4); ctx.fill();
+  sketchStroke(ctx,bx+bw*0.1,y,bw*0.8,capH,4,'rgba(255,255,255,0.1)',1);
+  // Spool hole on top
+  ctx.beginPath(); ctx.arc(bx+bw/2, y+capH/2, bw*0.08, 0, Math.PI*2); ctx.fillStyle='#111'; ctx.fill();
+  // Bottom lip
+  const lipH=h*0.07;
+  ctx.fillStyle='#222';
+  rrect(ctx,bx+bw*0.05,by+bh-lipH,bw*0.9,lipH,3); ctx.fill();
+  // Highlight stripe
+  const hlx=bx+bw*0.7, hlw=bw*0.06;
+  const hlGrad=ctx.createLinearGradient(hlx,by,hlx+hlw,by);
+  hlGrad.addColorStop(0,'rgba(255,255,255,0)');
+  hlGrad.addColorStop(0.5,'rgba(255,255,255,0.12)');
+  hlGrad.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=hlGrad; ctx.fillRect(hlx,by+bh*0.05,hlw,bh*0.9);
+}
+function sketchStroke(ctx,x,y,w,h,r,col,lw){
+  ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=lw; ctx.lineCap='round';
+  const j=()=>(Math.random()-0.5)*1.2;
+  ctx.beginPath();
+  ctx.moveTo(x+r+j(),y+j()); ctx.lineTo(x+w-r+j(),y+j());
+  ctx.quadraticCurveTo(x+w+j(),y+j(),x+w+j(),y+r+j());
+  ctx.lineTo(x+w+j(),y+h-r+j());
+  ctx.quadraticCurveTo(x+w+j(),y+h+j(),x+w-r+j(),y+h+j());
+  ctx.lineTo(x+r+j(),y+h+j());
+  ctx.quadraticCurveTo(x+j(),y+h+j(),x+j(),y+h-r+j());
+  ctx.lineTo(x+j(),y+r+j());
+  ctx.quadraticCurveTo(x+j(),y+j(),x+r+j(),y+j());
+  ctx.closePath(); ctx.stroke(); ctx.restore();
+}
+// ═══════════════════════════════
+// IMAGE PROCESSING
+// ═══════════════════════════════
+function applyLook(src, pr, intPct) {
+  const w=src.width, h=src.height;
+  const out=document.createElement('canvas'); out.width=w; out.height=h;
+  const ctx=out.getContext('2d'); ctx.drawImage(src,0,0);
+  if (preset==='none') return out;
+  const ratio=intPct/100;
+  const id=ctx.getImageData(0,0,w,h); const d=id.data;
+  const isBW=pr.sat===0;
+  const sat=1+(pr.sat-1)*ratio;
+  for(let i=0;i<d.length;i+=4){
+    let r=d[i],g=d[i+1],b=d[i+2];
+    let pr2=r,pg=g,pb=b;
+    if(isBW){
+      const lum=0.299*r+0.587*g+0.114*b;
+      pr2=lum+(lum>180?(lum-180)*0.025:0); pg=lum; pb=lum-(lum>180?(lum-180)*0.01:0);
+    } else {
+      if(pr.r){ pr2=pr.r[0]+(r/255)*(pr.r[1]-pr.r[0]); pg=pr.g[0]+(g/255)*(pr.g[1]-pr.g[0]); pb=pr.b[0]+(b/255)*(pr.b[1]-pr.b[0]); }
+      if(sat!==1){ const gray=0.299*pr2+0.587*pg+0.114*pb; pr2=gray+sat*(pr2-gray); pg=gray+sat*(pg-gray); pb=gray+sat*(pb-gray); }
+    }
+    d[i]=Math.min(255,Math.max(0,Math.round(r+(pr2-r)*ratio)));
+    d[i+1]=Math.min(255,Math.max(0,Math.round(g+(pg-g)*ratio)));
+    d[i+2]=Math.min(255,Math.max(0,Math.round(b+(pb-b)*ratio)));
+  }
+  ctx.putImageData(id,0,0);
+  if(pr.tint){ ctx.globalAlpha=ratio; ctx.fillStyle=pr.tint; ctx.fillRect(0,0,w,h); ctx.globalAlpha=1; }
+  const gr=Math.round((pr.grain||0)*ratio);
+  if(gr>0){
+    const gd=ctx.createImageData(w,h);
+    for(let i=0;i<gd.data.length;i+=4){const v=(Math.random()-.5)*gr;gd.data[i]=128+v;gd.data[i+1]=128+v;gd.data[i+2]=128+v;gd.data[i+3]=16;}
+    const gc=document.createElement('canvas');gc.width=w;gc.height=h;gc.getContext('2d').putImageData(gd,0,0);
+    ctx.globalCompositeOperation='overlay';ctx.drawImage(gc,0,0);ctx.globalCompositeOperation='source-over';
+  }
+  return out;
+}
+// ═══════════════════════════════
+// GENERATE
+// ═══════════════════════════════
+function generate() {
+  const n = photos.length;
+  if (n<8)  { setErr('至少需要8张照片'); return; }
+  if (n>36) { setErr('最多36张'); return; }
+  setErr('');
+  const pr   = PRESETS[preset];
+  const fps  = parseInt(document.getElementById('fpsr').value);
+  const dateStr = document.getElementById('datin').value.trim();
+  const useWB = document.getElementById('wbToggle').checked;
+  const S = 2; // @2x
+  // ── Dimensions ──
+  let STRIP_H, PERF_H, FRAME_W, FRAME_H, STRIP_W, LEFT_PAD;
+  if (filmMode === 'portrait') {
+    PERF_H  = PORT.perfH;
+    FRAME_W = PORT.frameW;
+    FRAME_H = PORT.frameH;
+    STRIP_H = PORT.stripH;
+    STRIP_W = PORT.stripW(fps);
+    LEFT_PAD= PORT.leftPad(fps);
+  } else {
+    PERF_H  = LAND.perfH;
+    FRAME_H = LAND.frameH;
+    FRAME_W = LAND.frameW;
+    STRIP_H = LAND.stripH;
+    STRIP_W = LAND.stripW(fps);
+    LEFT_PAD= LAND.leftPad();
+  }
+  // ── Canister dimensions (same logic for both modes) ──
+  const CAN_W = STRIP_H * 0.60;
+  const CAN_H = STRIP_H;
+  const CAN_OVERLAP = CAN_W * 0.15; // how much canister overlaps the strip
+  const TAIL_H = Math.round(STRIP_H * 0.42); // 保留常量不影响逻辑
+  const rows = Math.ceil(n / fps);
+  // 画布高度：移除单独Tail的高度
+  let CW = LEFT_PAD + STRIP_W + PAD;
+  let CH = PAD + (dateStr?20:8) + rows*STRIP_H + (rows-1)*ROW_GAP + ROW_GAP + PAD + 18;
+  // White border adds to both sides
+  const wbOff = useWB ? WB : 0;
+  const fullW = CW + wbOff*2;
+  const fullH = CH + wbOff*2;
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  cv.width  = fullW*S;
+  cv.height = fullH*S;
+  cv.style.width  = fullW+'px';
+  cv.style.height = fullH+'px';
+  ctx.scale(S, S);
+  // ── White border background ──
+  if (useWB) {
+    ctx.fillStyle = '#f8f5ee';
+    ctx.fillRect(0, 0, fullW, fullH);
+    const sGrad = ctx.createLinearGradient(0,0,0,fullH);
+    sGrad.addColorStop(0,'rgba(0,0,0,0.06)');
+    sGrad.addColorStop(0.08,'rgba(0,0,0,0)');
+    sGrad.addColorStop(0.92,'rgba(0,0,0,0)');
+    sGrad.addColorStop(1,'rgba(0,0,0,0.06)');
+    ctx.fillStyle=sGrad; ctx.fillRect(0,0,fullW,fullH);
+    const sGrad2 = ctx.createLinearGradient(0,0,fullW,0);
+    sGrad2.addColorStop(0,'rgba(0,0,0,0.04)');
+    sGrad2.addColorStop(0.06,'rgba(0,0,0,0)');
+    sGrad2.addColorStop(0.94,'rgba(0,0,0,0)');
+    sGrad2.addColorStop(1,'rgba(0,0,0,0.04)');
+    ctx.fillStyle=sGrad2; ctx.fillRect(0,0,fullW,fullH);
+    for(let i=0;i<800;i++){
+      ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.018})`;
+      ctx.fillRect(Math.random()*fullW,Math.random()*fullH,1,1);
+    }
+  }
+  // Content offset
+  const ox = wbOff;
+  const oy = wbOff;
+  // ── Date label ──
+  let contentY = oy + PAD;
+  if (dateStr) {
+    ctx.font='italic 11px Georgia,serif'; ctx.fillStyle='#aaa'; ctx.textAlign='left';
+    ctx.fillText(dateStr, ox+LEFT_PAD, contentY+13);
+    contentY += 20;
+  } else {
+    contentY += 8;
+  }
+  // ── Strip x position ──
+  const stripX = ox + LEFT_PAD;
+  // ── Film rows ──
+  let globalFrame = 0;
+  for (let row=0; row<rows; row++) {
+    if (row > 0) contentY += ROW_GAP;
+    const rowPhotos = photos.slice(row*fps, (row+1)*fps);
+    const emptySlots = fps - rowPhotos.length; // 计算当前行空帧数量
+    const y = contentY;
+
+    // ========== 修改：根据是否为最后一行绘制不同基底 ==========
+    ctx.fillStyle = pr.filmBg;
+    if (row === rows - 1 && emptySlots > 0) {
+      // 最后一行有空帧：绘制带圆角舌头的胶片基底
+      const tongueWidth = emptySlots * (FRAME_W + GAP);
+      const ts = stripX + STRIP_W - tongueWidth; // 舌头起始x坐标
+      const hz = PERF_H;
+      const midTop = y + hz;
+      const midBot = y + STRIP_H - hz;
+      const notchW = tongueWidth * 0.1; // 缺口宽度
+      const notchTop = midTop - (midBot - midTop) * 0.05;
+      const notchBot = midBot + (midBot - midTop) * 0.05;
+      const cornerRadius = 8; // 舌头圆角半径
+
+      // 构建带舌头的路径
+      ctx.beginPath();
+      ctx.moveTo(stripX, y);
+      ctx.lineTo(ts, y);
+      ctx.lineTo(ts, notchTop);
+      ctx.lineTo(ts + notchW, notchTop);
+      ctx.lineTo(ts + notchW, midTop);
+      // 右上角圆角
+      ctx.quadraticCurveTo(stripX + STRIP_W, midTop, stripX + STRIP_W, midTop + cornerRadius);
+      ctx.lineTo(stripX + STRIP_W, midBot - cornerRadius);
+      // 右下角圆角
+      ctx.quadraticCurveTo(stripX + STRIP_W, midBot, stripX + STRIP_W - cornerRadius, midBot);
+      ctx.lineTo(ts + notchW, midBot);
+      ctx.lineTo(ts + notchW, notchBot);
+      ctx.lineTo(ts, notchBot);
+      ctx.lineTo(stripX, y + STRIP_H);
+      ctx.lineTo(stripX, y);
+      ctx.closePath();
+      ctx.fill();
+
+      // 舌头区域加渐变，保持原质感
+      const tailGrad = ctx.createLinearGradient(ts, 0, stripX + STRIP_W, 0);
+      tailGrad.addColorStop(0, 'rgba(0,0,0,0)');
+      tailGrad.addColorStop(1, 'rgba(0,0,0,0.6)');
+      ctx.save();
+      ctx.fillStyle = tailGrad;
+      ctx.fillRect(ts, y, tongueWidth, STRIP_H);
+      ctx.restore();
+
+      // 齿孔仅绘制到舌头起始位置
+      drawPerfs(ctx, stripX, y, ts - stripX, PERF_H, pr);
+      drawPerfs(ctx, stripX, y + STRIP_H - PERF_H, ts - stripX, PERF_H, pr);
+    } else {
+      // 普通行/满帧最后一行：绘制矩形基底
+      ctx.fillRect(stripX, y, STRIP_W, STRIP_H);
+      // 绘制整行齿孔
+      drawPerfs(ctx, stripX, y, STRIP_W, PERF_H, pr);
+      drawPerfs(ctx, stripX, y + STRIP_H - PERF_H, STRIP_W, PERF_H, pr);
+    }
+    // ========== 修改结束 ==========
+
+    // Frames
+    for (let f=0; f<fps; f++) {
+      const fx = stripX + EDGE + f*(FRAME_W+GAP);
+      const fy = y + PERF_H;
+      if (f < rowPhotos.length) {
+        const processed = applyLook(rowPhotos[f].canvas, pr, intensity);
+        ctx.save();
+        ctx.beginPath(); ctx.rect(fx, fy, FRAME_W, FRAME_H); ctx.clip();
+        ctx.drawImage(processed, fx, fy, FRAME_W, FRAME_H);
+        ctx.restore();
+      }
+      // 帧编号仅绘制有照片的位置
+      if (f < rowPhotos.length) {
+        ctx.fillStyle='rgba(255,255,255,0.22)';
+        ctx.font=`bold ${Math.round(STRIP_H*0.07)}px monospace`;
+        ctx.textAlign='center';
+        ctx.fillText((globalFrame+f+1).toString(), fx+FRAME_W/2, y+PERF_H-Math.round(PERF_H*0.2));
+      }
+    }
+    // Film brand text in top perf zone
+    const ldrName = LEADERS[leaderIdx].name.replace('\n',' ').toUpperCase();
+    ctx.font=`${Math.round(PERF_H*0.4)}px monospace`;
+    ctx.fillStyle='rgba(255,255,255,0.18)';
+    ctx.textAlign='left';
+    ctx.fillText(ldrName, stripX+EDGE, y+PERF_H*0.55);
+    // Row 0: draw canister overlapping left side of this strip
+    if (row === 0) {
+      const canX = stripX - CAN_W + CAN_OVERLAP;
+      drawCanister(ctx, canX, y, CAN_W, CAN_H);
+    }
+    globalFrame += rowPhotos.length;
+    contentY += STRIP_H;
+  }
+
+  // ========== 修改：移除原独立Tail逻辑，调整底部标签位置 ==========
+  contentY += ROW_GAP; // 最后一行与底部标签的间距
+  // ── Bottom label ──
+  const filmName=LEADERS[leaderIdx].name.replace('\n',' ');
+  ctx.font='10px monospace'; ctx.fillStyle=useWB?'#aaa':'#888';
+  ctx.textAlign='center';
+  const labelStr = filmName + (dateStr?' · '+dateStr:'');
+  ctx.fillText(labelStr, ox+LEFT_PAD+STRIP_W/2, contentY + 10);
+  // ========== 修改结束 ==========
+
+  // Done
+  document.getElementById('ph').style.display='none';
+  cv.style.display='block';
+  document.getElementById('expb').disabled=false;
+}
+// ═══════════════════════════════
+// EXPORT
+// ═══════════════════════════════
+function exportPNG() {
+  const cv=document.getElementById('cv');
+  if(cv.style.display==='none') return;
+  const name=LEADERS[leaderIdx].name.replace(/\n/g,'-').replace(/\s+/g,'');
+  const a=document.createElement('a');
+  a.download=`film-${filmMode}-${name}-${Date.now()}.png`;
+  a.href=cv.toDataURL('image/png'); a.click();
+}
+// ═══════════════════════════════
+// INIT
+// ═══════════════════════════════
+initLeaderGrid();
+renderThumbs();
+</script>
+</body>
+</html>
