@@ -49,6 +49,14 @@ header{height:48px;background:#080808;border-bottom:1px solid var(--bdr);display
 .mn{display:block;font-weight:600;font-size:11px}
 .ms{display:block;font-size:9px;color:var(--txd);margin-top:2px}
 .mode-btn.act .ms{color:#a06820}
+/* Output mode toggle (Film Roll vs Poster) */
+.outmode-row{display:flex;gap:5px}
+.outmode-btn{flex:1;padding:7px 4px;border:1px solid var(--bdr);border-radius:5px;background:var(--sf);color:var(--tx);font-size:11px;cursor:pointer;transition:all .15s;font-family:inherit;text-align:center;line-height:1.35}
+.outmode-btn:hover{border-color:var(--bdr2)}
+.outmode-btn.act{border-color:var(--amber);background:rgba(200,136,42,.1);color:var(--amber)}
+.omn{display:block;font-weight:600;font-size:11px}
+.oms{display:block;font-size:9px;color:var(--txd);margin-top:2px}
+.outmode-btn.act .oms{color:#a06820}
 /* Leader style picker */
 .lgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
 .lopt{border:1.5px solid var(--bdr);border-radius:4px;overflow:hidden;cursor:pointer;transition:border-color .15s;background:var(--sf)}
@@ -85,6 +93,13 @@ header{height:48px;background:#080808;border-bottom:1px solid var(--bdr);display
 /* Text input */
 .txin{width:100%;background:var(--sf);border:1px solid var(--bdr);border-radius:4px;color:var(--tx);padding:7px 9px;font-size:11px;font-family:'Special Elite',cursive;outline:none;transition:border-color .15s}
 .txin:focus{border-color:#444}
+/* Poster-specific inputs */
+.poster-section{display:none}
+.poster-section.visible{display:block}
+.txin-sm{width:100%;background:var(--sf);border:1px solid var(--bdr);border-radius:4px;color:var(--tx);padding:6px 9px;font-size:11px;font-family:'Noto Serif SC',serif;outline:none;transition:border-color .15s;margin-bottom:6px}
+.txin-sm:focus{border-color:#444}
+.txin-sm:last-child{margin-bottom:0}
+.txin-sm::placeholder{color:#444}
 /* Buttons */
 .btngrp{padding:14px;display:flex;flex-direction:column;gap:7px;margin-top:auto;border-top:1px solid var(--bdr)}
 .genbtn{width:100%;padding:10px;background:var(--amber);border:none;border-radius:5px;color:#0e0e0e;font-size:13px;font-weight:700;cursor:pointer;font-family:'Special Elite',cursive;letter-spacing:.05em;transition:background .15s}
@@ -125,32 +140,66 @@ header{height:48px;background:#080808;border-bottom:1px solid var(--bdr);display
     <div class="tgrid" id="tg"></div>
   </div>
   <div class="div"></div>
-  <!-- Mode -->
+
+  <!-- Output Mode: Film Roll vs Poster -->
   <div class="sbs" style="padding-top:14px">
-    <span class="lbl">版式</span>
-    <div class="mode-row">
-      <button class="mode-btn act" data-m="portrait" onclick="selMode(this)">
-        <span class="mn">竖版</span><span class="ms">帧 2:3 竖向</span>
+    <span class="lbl">输出模式</span>
+    <div class="outmode-row">
+      <button class="outmode-btn act" data-om="filmroll" onclick="selOutMode(this)">
+        <span class="omn">胶卷模式</span><span class="oms">含胶卷壳排版</span>
       </button>
-      <button class="mode-btn" data-m="landscape" onclick="selMode(this)">
-        <span class="mn">横版</span><span class="ms">帧 3:2 横向</span>
+      <button class="outmode-btn" data-om="poster" onclick="selOutMode(this)">
+        <span class="omn">海报模式</span><span class="oms">白底满幅海报</span>
       </button>
     </div>
   </div>
-  <!-- White border toggle -->
-  <div class="sbs" style="padding-top:12px">
-    <div class="trow">
-      <span>复古白框</span>
-      <label class="toggle"><input type="checkbox" id="wbToggle" checked><span class="tslider"></span></label>
+
+  <!-- Film Roll only settings -->
+  <div id="filmroll-settings">
+    <!-- Mode -->
+    <div class="sbs" style="padding-top:14px">
+      <span class="lbl">版式</span>
+      <div class="mode-row">
+        <button class="mode-btn act" data-m="portrait" onclick="selMode(this)">
+          <span class="mn">竖版</span><span class="ms">帧 2:3 竖向</span>
+        </button>
+        <button class="mode-btn" data-m="landscape" onclick="selMode(this)">
+          <span class="mn">横版</span><span class="ms">帧 3:2 横向</span>
+        </button>
+      </div>
     </div>
+    <!-- White border toggle -->
+    <div class="sbs" style="padding-top:12px">
+      <div class="trow">
+        <span>复古白框</span>
+        <label class="toggle"><input type="checkbox" id="wbToggle" checked><span class="tslider"></span></label>
+      </div>
+    </div>
+    <div class="div"></div>
+    <!-- Leader style -->
+    <div class="sbs" style="padding-top:14px">
+      <span class="lbl">胶卷头款式</span>
+      <div class="lgrid" id="lgrid"></div>
+    </div>
+    <div class="div"></div>
   </div>
-  <div class="div"></div>
-  <!-- Leader style -->
-  <div class="sbs" style="padding-top:14px">
-    <span class="lbl">胶卷头款式</span>
-    <div class="lgrid" id="lgrid"></div>
+
+  <!-- Poster only settings -->
+  <div id="poster-settings" class="poster-section">
+    <div class="sbs" style="padding-top:14px">
+      <span class="lbl">海报标题</span>
+      <input class="txin" id="posterTitle" placeholder="LIFE WITH FILM" maxlength="32" style="font-family:'Special Elite',cursive;font-size:14px">
+    </div>
+    <div class="sbs" style="padding-top:12px">
+      <span class="lbl">底部标签 <span style="color:#555;font-size:9px;letter-spacing:0;text-transform:none">（最多3条，可留空）</span></span>
+      <input class="txin-sm" id="tag1" placeholder="🎞  Kodak Ultramax 400 · ISO 400" maxlength="40">
+      <input class="txin-sm" id="tag2" placeholder="📷  相机型号" maxlength="40">
+      <input class="txin-sm" id="tag3" placeholder="🖨  扫描仪型号" maxlength="40">
+    </div>
+    <div class="div"></div>
   </div>
-  <div class="div"></div>
+
+  <!-- Shared settings -->
   <!-- Preset -->
   <div class="sbs" style="padding-top:14px">
     <span class="lbl">色调预设</span>
@@ -163,7 +212,7 @@ header{height:48px;background:#080808;border-bottom:1px solid var(--bdr);display
     </div>
   </div>
   <!-- Intensity -->
-  <div class="sbs" style="padding-top:12px" id="isec" style="display:none">
+  <div class="sbs" style="padding-top:12px" id="isec">
     <span class="lbl">滤镜浓度</span>
     <div class="irow">
       <button class="ibtn" data-v="20" onclick="selInt(this)">20%</button>
@@ -184,8 +233,8 @@ header{height:48px;background:#080808;border-bottom:1px solid var(--bdr);display
       <span class="sval" id="fpsv">5</span>
     </div>
   </div>
-  <!-- Date -->
-  <div class="sbs" style="padding-top:12px;padding-bottom:14px">
+  <!-- Date (film roll mode only) -->
+  <div class="sbs" style="padding-top:12px;padding-bottom:14px" id="dateSection">
     <span class="lbl">日期 / 备注</span>
     <input class="txin" id="datin" placeholder="2024  SUMMER" maxlength="24">
   </div>
@@ -200,7 +249,7 @@ header{height:48px;background:#080808;border-bottom:1px solid var(--bdr);display
   <div class="ph" id="ph">
     <div class="phi">🎞</div>
     <div class="pht">上传 8–36 张照片，点击生成</div>
-    <div class="phs">模拟整卷35mm胶片展开<br>竖版 / 横版两种版式<br>含立体胶卷壳 · 复古白框可选</div>
+    <div class="phs">胶卷模式：模拟整卷35mm胶片展开<br>海报模式：白底满幅海报，含标题与标签</div>
   </div>
   <canvas id="cv" style="display:none"></canvas>
 </div>
@@ -212,6 +261,7 @@ header{height:48px;background:#080808;border-bottom:1px solid var(--bdr);display
 // ═══════════════════════════════
 let photos = [];      // {raw:Image, canvas:OffscreenCanvas, name, crop}
 let filmMode = 'portrait';  // 'portrait' | 'landscape'
+let outputMode = 'filmroll'; // 'filmroll' | 'poster'
 let preset = 'none';
 let intensity = 60;
 let leaderIdx = 0;
@@ -237,7 +287,6 @@ const PORT = {
   perfH: 28,
   get stripH() { return this.frameH + this.perfH*2; },
   stripW(fps) { return EDGE*2 + GAP*(fps-1) + this.frameW*fps; },
-  // Canister sits left of row-0, overlapping strip slightly
   canW(fps) { return this.stripH * 0.60; },
   canH(fps) { return this.stripH; },
   leftPad(fps) {
@@ -305,11 +354,9 @@ function normalizeImg(src, crop, targetAsp) {
   const sAsp = sw / sh;
   let srcX = 0, srcY = 0, srcW = sw, srcH = sh;
   if (sAsp > targetAsp) {
-    // source wider → crop sides
     srcW = sh * targetAsp;
     srcX = (sw - srcW) / 2;
   } else {
-    // source taller → crop top/bottom
     srcH = sw / targetAsp;
     const spare = sh - srcH;
     srcY = crop === 'top' ? 0 : crop === 'bot' ? spare : spare / 2;
@@ -336,7 +383,6 @@ function renderThumbs() {
     const del = document.createElement('button');
     del.className = 'tdel'; del.textContent = '×';
     del.onclick = e => { e.stopPropagation(); photos.splice(i,1); renderThumbs(); };
-    // Drag
     thumb.addEventListener('dragstart', () => { dragSrc = i; thumb.classList.add('dsrc'); });
     thumb.addEventListener('dragend', () => { dragSrc = null; document.querySelectorAll('.thumb').forEach(t => t.classList.remove('dsrc','dot')); });
     thumb.addEventListener('dragover', e => { e.preventDefault(); thumb.classList.add('dot'); });
@@ -349,7 +395,6 @@ function renderThumbs() {
       renderThumbs();
     });
     thumb.append(img, del);
-    // Crop buttons
     const crow = document.createElement('div');
     crow.className = 'croprow';
     ['top','mid','bot'].forEach(c => {
@@ -366,11 +411,19 @@ function renderThumbs() {
 // ═══════════════════════════════
 // CONTROLS
 // ═══════════════════════════════
+function selOutMode(btn) {
+  document.querySelectorAll('.outmode-btn').forEach(b => b.classList.remove('act'));
+  btn.classList.add('act');
+  outputMode = btn.dataset.om;
+  const isFilmRoll = outputMode === 'filmroll';
+  document.getElementById('filmroll-settings').style.display = isFilmRoll ? '' : 'none';
+  document.getElementById('poster-settings').classList.toggle('visible', !isFilmRoll);
+  document.getElementById('dateSection').style.display = isFilmRoll ? '' : 'none';
+}
 function selMode(btn) {
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('act'));
   btn.classList.add('act');
   filmMode = btn.dataset.m;
-  // Re-normalize all photos for new aspect ratio
   photos.forEach(p => { p.canvas = normalizeImg(p.raw, p.crop); });
   renderThumbs();
 }
@@ -385,7 +438,6 @@ function selInt(btn) {
   btn.classList.add('act');
   intensity = parseInt(btn.dataset.v);
 }
-// Hide intensity by default
 document.getElementById('isec').style.display = 'none';
 // ═══════════════════════════════
 // LEADER THUMBNAILS INIT
@@ -433,7 +485,6 @@ function rrect(ctx, x, y, w, h, r) {
   ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
   ctx.closePath();
 }
-// Slightly wobbly fill for hand-drawn feel
 function sketchy(ctx, x, y, w, h, fill, lineCol) {
   ctx.fillStyle = fill; ctx.fillRect(x, y, w, h);
   if (!lineCol) return;
@@ -445,7 +496,6 @@ function sketchy(ctx, x, y, w, h, fill, lineCol) {
   ctx.lineTo(x+j(),y+h+j()); ctx.closePath(); ctx.stroke();
   ctx.restore();
 }
-// Perforations row
 function drawPerfs(ctx, x, y, sw, perfH, pr) {
   const hCount = Math.max(4, Math.round(sw / 20));
   const hW = 9, hH = Math.round(perfH * 0.55), hR = 2;
@@ -458,19 +508,16 @@ function drawPerfs(ctx, x, y, sw, perfH, pr) {
 }
 // ═══════════════════════════════
 // LEADER DRAWERS
-// When isPreview=true: fill whole w×h area for thumbnail
-// When isPreview=false: draw tongue only on right 45% of the strip
 // ═══════════════════════════════
-// Returns tongue bounds for a full strip leader
 function tongue(x, y, w, h) {
-  const ts  = x + w * 0.55;   // tongue starts here
-  const nW  = w * 0.08;       // notch width
-  const hz  = Math.round(h * 0.22); // perf zone height
+  const ts  = x + w * 0.55;
+  const nW  = w * 0.08;
+  const hz  = Math.round(h * 0.22);
   const mY  = y + h/2;
   const tH  = h * 0.48;
   const t1  = mY - tH/2;
   const t2  = mY + tH/2;
-  const tx  = ts + nW;         // inner tongue x
+  const tx  = ts + nW;
   const ty  = y + hz + 2;
   const tw  = x + w - tx;
   const th  = h - hz*2 - 4;
@@ -486,7 +533,6 @@ function clipTongue(ctx, x, y, w, h) {
   ctx.lineTo(ts+nW, t2); ctx.lineTo(ts, t2);
   ctx.closePath();
 }
-// ── Fuji Provia 100F (green left + blue right + white text)
 function ldrFujiProvia(ctx, x, y, w, h, isPreview) {
   if (isPreview) {
     ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
@@ -514,7 +560,6 @@ function ldrFujiProvia(ctx, x, y, w, h, isPreview) {
   ctx.fillText('DAYLIGHT · E-6',tx+tw/2,ty+th*0.91);
   ctx.restore();
 }
-// ── Fuji Fujicolor 200 (green + big white panel + "200")
 function ldrFujicolor200(ctx, x, y, w, h, isPreview) {
   if (isPreview) {
     ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
@@ -541,7 +586,6 @@ function ldrFujicolor200(ctx, x, y, w, h, isPreview) {
   ctx.fillText('FILM FOR COLOR PRINTS',tx+tw*0.5,ty+th*0.93);
   ctx.restore();
 }
-// ── Kodak Ektachrome E100 (blue+gold, vertical E100)
 function ldrEktaE100(ctx, x, y, w, h, isPreview) {
   if (isPreview) {
     ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
@@ -574,7 +618,6 @@ function ldrEktaE100(ctx, x, y, w, h, isPreview) {
   ctx.fillText('E-6 · 36exp',tx+tw*0.96,ty+th*0.62);
   ctx.restore();
 }
-// ── Kodak Ektachrome E100D (blue+gold, E100D + serial)
 function ldrEktaE100D(ctx, x, y, w, h, isPreview) {
   if (isPreview) {
     ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
@@ -608,7 +651,6 @@ function ldrEktaE100D(ctx, x, y, w, h, isPreview) {
   ctx.fillText('E-6 · 36exp',tx+tw*0.96,ty+th*0.7);
   ctx.restore();
 }
-// ── Kodak Portra 160 (gold+black band, italic serif)
 function ldrPortra160(ctx, x, y, w, h, isPreview) {
   if (isPreview) {
     ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
@@ -640,7 +682,6 @@ function ldrPortra160(ctx, x, y, w, h, isPreview) {
   ctx.fillText('36 EXP',tx+tw*0.95,ty+th*0.95);
   ctx.restore();
 }
-// ── Kodak Portra 400 (same as 160 but different number)
 function ldrPortra400(ctx, x, y, w, h, isPreview) {
   if (isPreview) {
     ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
@@ -672,7 +713,6 @@ function ldrPortra400(ctx, x, y, w, h, isPreview) {
   ctx.fillText('36 EXP',tx+tw*0.95,ty+th*0.95);
   ctx.restore();
 }
-// ── Kodak 400 Color (gold, big hand-lettered "kodak 400")
 function ldrKodak400(ctx, x, y, w, h, isPreview) {
   if (isPreview) {
     ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
@@ -700,7 +740,6 @@ function ldrKodak400(ctx, x, y, w, h, isPreview) {
   ctx.fillText('36exp.',tx+tw*0.96,ty+th*0.95);
   ctx.restore();
 }
-// ── Kodak Gold 200 (gold, "kodak GOLD 200", GB)
 function ldrGold200(ctx, x, y, w, h, isPreview) {
   if (isPreview) {
     ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
@@ -729,7 +768,6 @@ function ldrGold200(ctx, x, y, w, h, isPreview) {
   ctx.fillText('36exp.',tx+tw*0.96,ty+th*0.95);
   ctx.restore();
 }
-// ── Kodak Gold 100 (gold, GA)
 function ldrGold100(ctx, x, y, w, h, isPreview) {
   if (isPreview) {
     ctx.fillStyle='#111'; ctx.fillRect(x,y,w,h);
@@ -759,34 +797,25 @@ function ldrGold100(ctx, x, y, w, h, isPreview) {
   ctx.restore();
 }
 // ═══════════════════════════════
-// FILM CANISTER (portrait mode, row 0 left side)
-// Draws a simplified 3D-ish canister
+// FILM CANISTER
 // ═══════════════════════════════
 function drawCanister(ctx, x, y, w, h) {
-  // Body
   const bx=x+w*0.05, bw=w*0.88, by=y+h*0.12, bh=h*0.78;
-  // Cylinder body
   ctx.fillStyle='#1a1a1a'; rrect(ctx,bx,by,bw,bh,6); ctx.fill();
   sketchStroke(ctx,bx,by,bw,bh,6,'rgba(255,255,255,0.08)',1.5);
-  // Leader slot at bottom
   const slotW=bw*0.22, slotH=bh*0.08;
   const slotX=bx+(bw-slotW)/2, slotY=by+bh-slotH-bh*0.05;
   ctx.fillStyle='#0a0a0a'; rrect(ctx,slotX,slotY,slotW,slotH,2); ctx.fill();
-  // Label area (coloured panel on front)
   const lx=bx+bw*0.04, lw=bw*0.92, ly=by+bh*0.15, lh=bh*0.6;
   LEADERS[leaderIdx].draw(ctx, lx, ly, lw, lh, true);
-  // Top cap
   const capH=h*0.1;
   ctx.fillStyle='#2a2a2a';
   rrect(ctx,bx+bw*0.1,y,bw*0.8,capH,4); ctx.fill();
   sketchStroke(ctx,bx+bw*0.1,y,bw*0.8,capH,4,'rgba(255,255,255,0.1)',1);
-  // Spool hole on top
   ctx.beginPath(); ctx.arc(bx+bw/2, y+capH/2, bw*0.08, 0, Math.PI*2); ctx.fillStyle='#111'; ctx.fill();
-  // Bottom lip
   const lipH=h*0.07;
   ctx.fillStyle='#222';
   rrect(ctx,bx+bw*0.05,by+bh-lipH,bw*0.9,lipH,3); ctx.fill();
-  // Highlight stripe
   const hlx=bx+bw*0.7, hlw=bw*0.06;
   const hlGrad=ctx.createLinearGradient(hlx,by,hlx+hlw,by);
   hlGrad.addColorStop(0,'rgba(255,255,255,0)');
@@ -846,19 +875,225 @@ function applyLook(src, pr, intPct) {
   return out;
 }
 // ═══════════════════════════════
-// GENERATE
+// DRAW FILM STRIP ROW (shared by both modes)
 // ═══════════════════════════════
-function generate() {
+function drawFilmStripRow(ctx, row, rows, rowPhotos, stripX, y, fps,
+    STRIP_W, STRIP_H, FRAME_W, FRAME_H, PERF_H, pr, globalFrame) {
+  const emptySlots = fps - rowPhotos.length;
+
+  ctx.fillStyle = pr.filmBg;
+  if (row === rows - 1 && emptySlots > 0) {
+    const tongueWidth = emptySlots * (FRAME_W + GAP);
+    const ts = stripX + STRIP_W - tongueWidth;
+    const hz = PERF_H;
+    const midTop = y + hz;
+    const midBot = y + STRIP_H - hz;
+    const notchW = tongueWidth * 0.1;
+    const notchTop = midTop - (midBot - midTop) * 0.05;
+    const notchBot = midBot + (midBot - midTop) * 0.05;
+    const cornerRadius = 8;
+    ctx.beginPath();
+    ctx.moveTo(stripX, y);
+    ctx.lineTo(ts, y);
+    ctx.lineTo(ts, notchTop);
+    ctx.lineTo(ts + notchW, notchTop);
+    ctx.lineTo(ts + notchW, midTop);
+    ctx.quadraticCurveTo(stripX + STRIP_W, midTop, stripX + STRIP_W, midTop + cornerRadius);
+    ctx.lineTo(stripX + STRIP_W, midBot - cornerRadius);
+    ctx.quadraticCurveTo(stripX + STRIP_W, midBot, stripX + STRIP_W - cornerRadius, midBot);
+    ctx.lineTo(ts + notchW, midBot);
+    ctx.lineTo(ts + notchW, notchBot);
+    ctx.lineTo(ts, notchBot);
+    ctx.lineTo(stripX, y + STRIP_H);
+    ctx.lineTo(stripX, y);
+    ctx.closePath();
+    ctx.fill();
+    const tailGrad = ctx.createLinearGradient(ts, 0, stripX + STRIP_W, 0);
+    tailGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    tailGrad.addColorStop(1, 'rgba(0,0,0,0.6)');
+    ctx.save();
+    ctx.fillStyle = tailGrad;
+    ctx.fillRect(ts, y, tongueWidth, STRIP_H);
+    ctx.restore();
+    drawPerfs(ctx, stripX, y, ts - stripX, PERF_H, pr);
+    drawPerfs(ctx, stripX, y + STRIP_H - PERF_H, ts - stripX, PERF_H, pr);
+  } else {
+    ctx.fillRect(stripX, y, STRIP_W, STRIP_H);
+    drawPerfs(ctx, stripX, y, STRIP_W, PERF_H, pr);
+    drawPerfs(ctx, stripX, y + STRIP_H - PERF_H, STRIP_W, PERF_H, pr);
+  }
+
+  // Frames
+  for (let f = 0; f < fps; f++) {
+    const fx = stripX + EDGE + f * (FRAME_W + GAP);
+    const fy = y + PERF_H;
+    if (f < rowPhotos.length) {
+      const processed = applyLook(rowPhotos[f].canvas, pr, intensity);
+      ctx.save();
+      ctx.beginPath(); ctx.rect(fx, fy, FRAME_W, FRAME_H); ctx.clip();
+      ctx.drawImage(processed, fx, fy, FRAME_W, FRAME_H);
+      ctx.restore();
+    }
+    if (f < rowPhotos.length) {
+      ctx.fillStyle = 'rgba(255,255,255,0.22)';
+      ctx.font = `bold ${Math.round(STRIP_H * 0.07)}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.fillText((globalFrame + f + 1).toString(), fx + FRAME_W / 2, y + PERF_H - Math.round(PERF_H * 0.2));
+    }
+  }
+  // Film brand text in top perf zone
+  const ldrName = LEADERS[leaderIdx].name.replace('\n', ' ').toUpperCase();
+  ctx.font = `${Math.round(PERF_H * 0.4)}px monospace`;
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  ctx.textAlign = 'left';
+  ctx.fillText(ldrName, stripX + EDGE, y + PERF_H * 0.55);
+}
+// ═══════════════════════════════
+// GENERATE POSTER MODE
+// ═══════════════════════════════
+function generatePoster() {
   const n = photos.length;
-  if (n<8)  { setErr('至少需要8张照片'); return; }
-  if (n>36) { setErr('最多36张'); return; }
-  setErr('');
+  const pr = PRESETS[preset];
+  const fps = parseInt(document.getElementById('fpsr').value);
+  const titleText = document.getElementById('posterTitle').value.trim() || 'LIFE WITH FILM';
+  const tags = [
+    document.getElementById('tag1').value.trim(),
+    document.getElementById('tag2').value.trim(),
+    document.getElementById('tag3').value.trim(),
+  ].filter(t => t.length > 0);
+
+  // Poster always uses landscape frames to match the reference image layout
+  // But respect the user's film mode setting for crop aspect ratio
+  // We use portrait frames (3:2 landscape display) for a clean look
+  // Actually let's use filmMode setting to respect user choice
+  let PERF_H, FRAME_W, FRAME_H, STRIP_H, STRIP_W;
+  if (filmMode === 'portrait') {
+    PERF_H  = PORT.perfH;
+    FRAME_W = PORT.frameW;
+    FRAME_H = PORT.frameH;
+    STRIP_H = PORT.stripH;
+    STRIP_W = PORT.stripW(fps);
+  } else {
+    PERF_H  = LAND.perfH;
+    FRAME_H = LAND.frameH;
+    FRAME_W = LAND.frameW;
+    STRIP_H = LAND.stripH;
+    STRIP_W = LAND.stripW(fps);
+  }
+
+  const S = 2; // @2x
+  const rows = Math.ceil(n / fps);
+
+  // Poster layout constants
+  const P_MARGIN = 40;         // outer white margin
+  const P_TITLE_H = 80;        // title block height
+  const P_COUNT_H = 32;        // photo count line height
+  const P_ROW_GAP = 12;        // gap between film strips
+  const P_TAG_H = tags.length > 0 ? 70 : 0;  // bottom tags area
+
+  const contentW = STRIP_W;
+  const fullW = contentW + P_MARGIN * 2;
+  const stripsH = rows * STRIP_H + (rows - 1) * P_ROW_GAP;
+  const fullH = P_MARGIN + P_TITLE_H + P_COUNT_H + stripsH + P_TAG_H + P_MARGIN;
+
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  cv.width  = fullW * S;
+  cv.height = fullH * S;
+  cv.style.width  = fullW + 'px';
+  cv.style.height = fullH + 'px';
+  ctx.scale(S, S);
+
+  // ── White background ──
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, fullW, fullH);
+
+  // Subtle paper texture
+  for (let i = 0; i < 1200; i++) {
+    ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.012})`;
+    ctx.fillRect(Math.random() * fullW, Math.random() * fullH, 1, 1);
+  }
+
+  let curY = P_MARGIN;
+
+  // ── Title ──
+  ctx.fillStyle = '#111111';
+  ctx.font = `bold 42px 'Special Elite', monospace`;
+  ctx.textAlign = 'left';
+  ctx.fillText(titleText.toUpperCase(), P_MARGIN, curY + 50);
+  curY += P_TITLE_H;
+
+  // ── Photo count row ──
+  ctx.fillStyle = '#888';
+  ctx.font = `14px 'Noto Serif SC', serif`;
+  ctx.textAlign = 'left';
+  // Small icon-ish square before count
+  ctx.fillStyle = '#bbb';
+  ctx.fillRect(P_MARGIN, curY + 4, 14, 14);
+  ctx.fillStyle = '#888';
+  ctx.fillText(`${n}`, P_MARGIN + 20, curY + 16);
+  curY += P_COUNT_H;
+
+  // ── Film strips ──
+  const stripX = P_MARGIN;
+  let globalFrame = 0;
+  for (let row = 0; row < rows; row++) {
+    if (row > 0) curY += P_ROW_GAP;
+    const rowPhotos = photos.slice(row * fps, (row + 1) * fps);
+    drawFilmStripRow(ctx, row, rows, rowPhotos, stripX, curY, fps,
+      STRIP_W, STRIP_H, FRAME_W, FRAME_H, PERF_H, pr, globalFrame);
+    globalFrame += rowPhotos.length;
+    curY += STRIP_H;
+  }
+
+  // ── Bottom tags ──
+  if (tags.length > 0) {
+    curY += 24;
+    const tagH = 36;
+    const tagPadX = 14;
+    const tagPadY = 10;
+    const tagFontSize = 13;
+    const tagGap = 10;
+    const tagRadius = 4;
+
+    ctx.font = `${tagFontSize}px 'Noto Serif SC', monospace`;
+    let tagX = P_MARGIN;
+
+    tags.forEach(tagText => {
+      const textW = ctx.measureText(tagText).width;
+      const tW = textW + tagPadX * 2;
+      const tH = tagH;
+
+      // Tag box
+      ctx.fillStyle = '#111111';
+      rrect(ctx, tagX, curY, tW, tH, tagRadius);
+      ctx.fill();
+
+      // Tag text
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'left';
+      ctx.font = `${tagFontSize}px 'Noto Serif SC', monospace`;
+      ctx.fillText(tagText, tagX + tagPadX, curY + tagPadY + tagFontSize);
+
+      tagX += tW + tagGap;
+    });
+  }
+
+  // Done
+  document.getElementById('ph').style.display = 'none';
+  cv.style.display = 'block';
+  document.getElementById('expb').disabled = false;
+}
+// ═══════════════════════════════
+// GENERATE (Film Roll mode)
+// ═══════════════════════════════
+function generateFilmRoll() {
+  const n = photos.length;
   const pr   = PRESETS[preset];
   const fps  = parseInt(document.getElementById('fpsr').value);
   const dateStr = document.getElementById('datin').value.trim();
   const useWB = document.getElementById('wbToggle').checked;
-  const S = 2; // @2x
-  // ── Dimensions ──
+  const S = 2;
   let STRIP_H, PERF_H, FRAME_W, FRAME_H, STRIP_W, LEFT_PAD;
   if (filmMode === 'portrait') {
     PERF_H  = PORT.perfH;
@@ -875,16 +1110,11 @@ function generate() {
     STRIP_W = LAND.stripW(fps);
     LEFT_PAD= LAND.leftPad();
   }
-  // ── Canister dimensions (same logic for both modes) ──
   const CAN_W = STRIP_H * 0.60;
-  const CAN_H = STRIP_H;
-  const CAN_OVERLAP = CAN_W * 0.15; // how much canister overlaps the strip
-  const TAIL_H = Math.round(STRIP_H * 0.42); // 保留常量不影响逻辑
+  const CAN_OVERLAP = CAN_W * 0.15;
   const rows = Math.ceil(n / fps);
-  // 画布高度：移除单独Tail的高度
   let CW = LEFT_PAD + STRIP_W + PAD;
   let CH = PAD + (dateStr?20:8) + rows*STRIP_H + (rows-1)*ROW_GAP + ROW_GAP + PAD + 18;
-  // White border adds to both sides
   const wbOff = useWB ? WB : 0;
   const fullW = CW + wbOff*2;
   const fullH = CH + wbOff*2;
@@ -895,7 +1125,6 @@ function generate() {
   cv.style.width  = fullW+'px';
   cv.style.height = fullH+'px';
   ctx.scale(S, S);
-  // ── White border background ──
   if (useWB) {
     ctx.fillStyle = '#f8f5ee';
     ctx.fillRect(0, 0, fullW, fullH);
@@ -916,10 +1145,8 @@ function generate() {
       ctx.fillRect(Math.random()*fullW,Math.random()*fullH,1,1);
     }
   }
-  // Content offset
   const ox = wbOff;
   const oy = wbOff;
-  // ── Date label ──
   let contentY = oy + PAD;
   if (dateStr) {
     ctx.font='italic 11px Georgia,serif'; ctx.fillStyle='#aaa'; ctx.textAlign='left';
@@ -928,119 +1155,45 @@ function generate() {
   } else {
     contentY += 8;
   }
-  // ── Strip x position ──
   const stripX = ox + LEFT_PAD;
-  // ── Film rows ──
   let globalFrame = 0;
   for (let row=0; row<rows; row++) {
     if (row > 0) contentY += ROW_GAP;
     const rowPhotos = photos.slice(row*fps, (row+1)*fps);
-    const emptySlots = fps - rowPhotos.length; // 计算当前行空帧数量
     const y = contentY;
-
-    // ========== 修改：根据是否为最后一行绘制不同基底 ==========
-    ctx.fillStyle = pr.filmBg;
-    if (row === rows - 1 && emptySlots > 0) {
-      // 最后一行有空帧：绘制带圆角舌头的胶片基底
-      const tongueWidth = emptySlots * (FRAME_W + GAP);
-      const ts = stripX + STRIP_W - tongueWidth; // 舌头起始x坐标
-      const hz = PERF_H;
-      const midTop = y + hz;
-      const midBot = y + STRIP_H - hz;
-      const notchW = tongueWidth * 0.1; // 缺口宽度
-      const notchTop = midTop - (midBot - midTop) * 0.05;
-      const notchBot = midBot + (midBot - midTop) * 0.05;
-      const cornerRadius = 8; // 舌头圆角半径
-
-      // 构建带舌头的路径
-      ctx.beginPath();
-      ctx.moveTo(stripX, y);
-      ctx.lineTo(ts, y);
-      ctx.lineTo(ts, notchTop);
-      ctx.lineTo(ts + notchW, notchTop);
-      ctx.lineTo(ts + notchW, midTop);
-      // 右上角圆角
-      ctx.quadraticCurveTo(stripX + STRIP_W, midTop, stripX + STRIP_W, midTop + cornerRadius);
-      ctx.lineTo(stripX + STRIP_W, midBot - cornerRadius);
-      // 右下角圆角
-      ctx.quadraticCurveTo(stripX + STRIP_W, midBot, stripX + STRIP_W - cornerRadius, midBot);
-      ctx.lineTo(ts + notchW, midBot);
-      ctx.lineTo(ts + notchW, notchBot);
-      ctx.lineTo(ts, notchBot);
-      ctx.lineTo(stripX, y + STRIP_H);
-      ctx.lineTo(stripX, y);
-      ctx.closePath();
-      ctx.fill();
-
-      // 舌头区域加渐变，保持原质感
-      const tailGrad = ctx.createLinearGradient(ts, 0, stripX + STRIP_W, 0);
-      tailGrad.addColorStop(0, 'rgba(0,0,0,0)');
-      tailGrad.addColorStop(1, 'rgba(0,0,0,0.6)');
-      ctx.save();
-      ctx.fillStyle = tailGrad;
-      ctx.fillRect(ts, y, tongueWidth, STRIP_H);
-      ctx.restore();
-
-      // 齿孔仅绘制到舌头起始位置
-      drawPerfs(ctx, stripX, y, ts - stripX, PERF_H, pr);
-      drawPerfs(ctx, stripX, y + STRIP_H - PERF_H, ts - stripX, PERF_H, pr);
-    } else {
-      // 普通行/满帧最后一行：绘制矩形基底
-      ctx.fillRect(stripX, y, STRIP_W, STRIP_H);
-      // 绘制整行齿孔
-      drawPerfs(ctx, stripX, y, STRIP_W, PERF_H, pr);
-      drawPerfs(ctx, stripX, y + STRIP_H - PERF_H, STRIP_W, PERF_H, pr);
-    }
-    // ========== 修改结束 ==========
-
-    // Frames
-    for (let f=0; f<fps; f++) {
-      const fx = stripX + EDGE + f*(FRAME_W+GAP);
-      const fy = y + PERF_H;
-      if (f < rowPhotos.length) {
-        const processed = applyLook(rowPhotos[f].canvas, pr, intensity);
-        ctx.save();
-        ctx.beginPath(); ctx.rect(fx, fy, FRAME_W, FRAME_H); ctx.clip();
-        ctx.drawImage(processed, fx, fy, FRAME_W, FRAME_H);
-        ctx.restore();
-      }
-      // 帧编号仅绘制有照片的位置
-      if (f < rowPhotos.length) {
-        ctx.fillStyle='rgba(255,255,255,0.22)';
-        ctx.font=`bold ${Math.round(STRIP_H*0.07)}px monospace`;
-        ctx.textAlign='center';
-        ctx.fillText((globalFrame+f+1).toString(), fx+FRAME_W/2, y+PERF_H-Math.round(PERF_H*0.2));
-      }
-    }
-    // Film brand text in top perf zone
-    const ldrName = LEADERS[leaderIdx].name.replace('\n',' ').toUpperCase();
-    ctx.font=`${Math.round(PERF_H*0.4)}px monospace`;
-    ctx.fillStyle='rgba(255,255,255,0.18)';
-    ctx.textAlign='left';
-    ctx.fillText(ldrName, stripX+EDGE, y+PERF_H*0.55);
-    // Row 0: draw canister overlapping left side of this strip
+    drawFilmStripRow(ctx, row, rows, rowPhotos, stripX, y, fps,
+      STRIP_W, STRIP_H, FRAME_W, FRAME_H, PERF_H, pr, globalFrame);
+    // Canister on row 0
     if (row === 0) {
       const canX = stripX - CAN_W + CAN_OVERLAP;
-      drawCanister(ctx, canX, y, CAN_W, CAN_H);
+      drawCanister(ctx, canX, y, CAN_W, CAN_W * (STRIP_H / (STRIP_H * 0.60)));
     }
     globalFrame += rowPhotos.length;
     contentY += STRIP_H;
   }
-
-  // ========== 修改：移除原独立Tail逻辑，调整底部标签位置 ==========
-  contentY += ROW_GAP; // 最后一行与底部标签的间距
-  // ── Bottom label ──
+  contentY += ROW_GAP;
   const filmName=LEADERS[leaderIdx].name.replace('\n',' ');
   ctx.font='10px monospace'; ctx.fillStyle=useWB?'#aaa':'#888';
   ctx.textAlign='center';
   const labelStr = filmName + (dateStr?' · '+dateStr:'');
   ctx.fillText(labelStr, ox+LEFT_PAD+STRIP_W/2, contentY + 10);
-  // ========== 修改结束 ==========
-
-  // Done
   document.getElementById('ph').style.display='none';
   cv.style.display='block';
   document.getElementById('expb').disabled=false;
+}
+// ═══════════════════════════════
+// GENERATE DISPATCHER
+// ═══════════════════════════════
+function generate() {
+  const n = photos.length;
+  if (n < 8)  { setErr('至少需要8张照片'); return; }
+  if (n > 36) { setErr('最多36张'); return; }
+  setErr('');
+  if (outputMode === 'poster') {
+    generatePoster();
+  } else {
+    generateFilmRoll();
+  }
 }
 // ═══════════════════════════════
 // EXPORT
@@ -1048,9 +1201,11 @@ function generate() {
 function exportPNG() {
   const cv=document.getElementById('cv');
   if(cv.style.display==='none') return;
-  const name=LEADERS[leaderIdx].name.replace(/\n/g,'-').replace(/\s+/g,'');
+  const name = outputMode === 'poster'
+    ? `film-poster-${Date.now()}.png`
+    : `film-${filmMode}-${LEADERS[leaderIdx].name.replace(/\n/g,'-').replace(/\s+/g,'')}-${Date.now()}.png`;
   const a=document.createElement('a');
-  a.download=`film-${filmMode}-${name}-${Date.now()}.png`;
+  a.download=name;
   a.href=cv.toDataURL('image/png'); a.click();
 }
 // ═══════════════════════════════
